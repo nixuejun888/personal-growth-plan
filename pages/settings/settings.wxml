@@ -1,0 +1,74 @@
+<view class="container">
+  <!-- 数据导出 -->
+  <view class="card">
+    <view class="card-title">
+      <view class="icon">⚙️</view>
+      <text class="title-text">数据备份与恢复</text>
+    </view>
+    <view class="form-hint">数据只保存在本机。更换设备、清理缓存或删除小程序都会丢失，建议定期导出，粘贴到「文件传输助手」保存。</view>
+    <view class="tool-row">
+      <view class="btn btn-primary" bindtap="onExport">导出数据到剪贴板</view>
+    </view>
+    <view class="form-hint">当前存储：{{sizeText}}</view>
+    <view class="form-hint">共 目标 {{stats.goals}} · 技能 {{stats.skills}} · 复盘 {{stats.reviews}} · 方向 {{stats.path}} · 行动 {{stats.actions}}</view>
+  </view>
+
+  <!-- 数据导入 -->
+  <view class="card">
+    <view class="card-title">
+      <view class="icon">📥</view>
+      <text class="title-text">导入数据</text>
+    </view>
+    <textarea
+      class="form-textarea import-textarea"
+      placeholder="粘贴之前导出的 JSON（支持完整导出文件或裸数据对象）"
+      placeholder-class="import-placeholder"
+      value="{{importText}}"
+      maxlength="-1"
+      bindinput="onImportInput"
+    ></textarea>
+    <view wx:if="{{importPreview}}" class="form-hint import-preview">
+      导入预览：目标 {{importPreview.goals}} · 技能 {{importPreview.skills}} · 复盘 {{importPreview.reviews}} · 方向 {{importPreview.path}} · 行动 {{importPreview.actions}}
+    </view>
+    <view class="tool-row">
+      <view class="btn btn-primary" bindtap="onValidateImport">校验并导入</view>
+    </view>
+    <view class="form-hint">导入会覆盖当前数据；覆盖前会自动生成一份备份（见下方列表），可随时恢复。</view>
+  </view>
+
+  <!-- 本地备份 -->
+  <view class="card">
+    <view class="card-title">
+      <view class="icon">🕘</view>
+      <text class="title-text">本地备份</text>
+      <view class="btn-text" catchtap="onRefreshBackups">刷新</view>
+    </view>
+    <block wx:if="{{backups.length}}">
+      <view class="backup-item" wx:for="{{backups}}" wx:key="id">
+        <view class="backup-meta">
+          <view class="backup-time">{{item.createdAt}}</view>
+          <view class="backup-label">{{item.label}}</view>
+          <view class="backup-counts">目标 {{item.counts.goals}} · 技能 {{item.counts.skills}} · 复盘 {{item.counts.reviews}}</view>
+        </view>
+        <view class="backup-actions">
+          <view class="btn btn-sm btn-secondary" catchtap="onRestoreBackup" data-id="{{item.id}}">恢复</view>
+          <view class="btn btn-sm btn-danger" catchtap="onDeleteBackup" data-id="{{item.id}}">删除</view>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="empty-state">
+      <view class="text">暂无备份（导入或恢复时会自动生成）</view>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="card">
+    <view class="card-title">
+      <view class="icon">ℹ️</view>
+      <text class="title-text">关于</text>
+    </view>
+    <view class="form-hint">版本 {{version}} · 数据结构 v{{schemaVersion}}</view>
+    <view class="form-hint">本地存储键：{{storageKey}}（微信上限约 10MB）</view>
+    <view class="form-hint">导出文件可长期保存；换设备时导出 → 新设备粘贴导入即可完整恢复。</view>
+  </view>
+</view>

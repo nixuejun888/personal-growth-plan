@@ -57,17 +57,13 @@
     <view class="card">
         <view class="card-header">
             <view class="card-title">
-                <view class="icon">💭</view>愿景描述</view>
+                <view class="icon">💭</view>分年愿景</view>
             <view bindtap="openVisionModal" class="btn btn-secondary btn-sm">编辑</view>
         </view>
-        <block wx:if="{{vision.year1||vision.year3||vision.values}}">
-            <view class="review-section" wx:if="{{vision.year1}}">
-                <view class="review-section-title">🎯 1年后愿景</view>
-                <view class="review-section-content">{{vision.year1}}</view>
-            </view>
-            <view class="review-section" wx:if="{{vision.year3}}">
-                <view class="review-section-title">🚀 3年职业目标</view>
-                <view class="review-section-content">{{vision.year3}}</view>
+        <block wx:if="{{vision.years.length>0||vision.values}}">
+            <view class="review-section" wx:for="{{vision.years}}" wx:key="year">
+                <view class="review-section-title">🎯 {{item.year}} 年愿景</view>
+                <view class="review-section-content">{{item.text}}</view>
             </view>
             <view class="review-section" wx:if="{{vision.values}}">
                 <view class="review-section-title">💎 核心价值观</view>
@@ -76,7 +72,7 @@
         </block>
         <view class="empty-state" wx:else>
             <view class="icon">💭</view>
-            <view class="text">让 AI 帮你启发思路，或自行撰写</view>
+            <view class="text">写下 1 年、3 年、5 年后的样子，让方向更清晰</view>
             <view bindtap="openVisionModal" class="btn btn-primary">撰写愿景</view>
         </view>
     </view>
@@ -137,31 +133,28 @@
 <view bindtap="closeVisionModal" class="modal-mask" wx:if="{{showVisionModal}}">
     <view catchtap="stopPropagation" class="modal-content">
         <view class="modal-header">
-            <view class="modal-title">撰写发展愿景</view>
+            <view class="modal-title">撰写分年愿景</view>
             <view bindtap="closeVisionModal" class="modal-close">✕</view>
         </view>
-        <view class="form-group">
-            <view class="form-label">1年后你希望成为什么样的人？<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-field="year1" style="margin-left:12rpx;">AI 启发</view>
+        <view class="form-group" wx:for="{{visionForm.years}}" wx:key="index">
+            <view class="form-label">愿景年份<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-index="{{index}}" style="margin-left:12rpx;">AI 启发</view>
             </view>
-            <textarea bindinput="onVisionYear1Input" class="form-textarea" placeholder="描述你1年后的状态..." value="{{visionForm.year1}}"></textarea>
-            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints.year1}}">
-                <view class="ai-hint-body">{{visionHints.year1}}</view>
+            <view style="display:flex;align-items:center;gap:12rpx;margin-bottom:12rpx;">
+                <input bindinput="onVisionYearInput" class="form-input" data-index="{{index}}" placeholder="年份，如 2027" style="flex:1;" type="number" value="{{item.year}}"></input>
+                <view bindtap="removeVisionYear" class="btn btn-danger btn-sm" data-index="{{index}}">删除</view>
             </view>
-        </view>
-        <view class="form-group">
-            <view class="form-label">3年后的职业目标<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-field="year3" style="margin-left:12rpx;">AI 启发</view>
-            </view>
-            <textarea bindinput="onVisionYear3Input" class="form-textarea" placeholder="描述你3年后的职业目标..." value="{{visionForm.year3}}"></textarea>
-            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints.year3}}">
-                <view class="ai-hint-body">{{visionHints.year3}}</view>
+            <textarea bindinput="onVisionYearTextInput" class="form-textarea" data-index="{{index}}" placeholder="描述你在 {{item.year}} 年的状态..." value="{{item.text}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints[index]}}">
+                <view class="ai-hint-body">{{visionHints[index]}}</view>
             </view>
         </view>
+        <view bindtap="addVisionYear" class="btn btn-secondary" style="margin-top:8rpx;">+ 添加一个年份</view>
         <view class="form-group">
-            <view class="form-label">核心价值观<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-field="values" style="margin-left:12rpx;">AI 启发</view>
+            <view class="form-label">核心价值观<view bindtap="showValuesHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 启发</view>
             </view>
             <textarea bindinput="onVisionValuesInput" class="form-textarea" placeholder="什么对你来说最重要？" value="{{visionForm.values}}"></textarea>
-            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints.values}}">
-                <view class="ai-hint-body">{{visionHints.values}}</view>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionValuesHint}}">
+                <view class="ai-hint-body">{{visionValuesHint}}</view>
             </view>
         </view>
         <view class="modal-footer">

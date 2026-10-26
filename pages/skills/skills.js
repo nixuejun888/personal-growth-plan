@@ -123,7 +123,7 @@ Page({
         }
     },
     openAddModal: function() {
-        this.setData({
+        this._dirty = !1, this.setData({
             showModal: !0,
             isEdit: !1,
             editId: "",
@@ -143,7 +143,7 @@ Page({
         });
         if (i) {
             var s = this.data.categories.indexOf(i.category);
-            this.setData({
+            this._dirty = !1, this.setData({
                 showModal: !0,
                 isEdit: !0,
                 editId: a,
@@ -159,41 +159,69 @@ Page({
         }
     },
     deleteSkill: function(t) {
-        var e = this, i = t.currentTarget.dataset.id;
-        wx.showModal({
-            title: "确认删除",
-            content: "确定要删除这个技能吗？",
+        var e = this, i = t.currentTarget.dataset.id, s = plainSkills(this.data.skills), n = s.findIndex(function(t) {
+            return t.id === i;
+        });
+        if (n < 0) return void wx.showToast({
+            title: "技能不存在，请刷新后重试",
+            icon: "none"
+        });
+        var o = s[n], r = s.filter(function(t) {
+            return t.id !== i;
+        });
+        if (!a.updateData("skills", r)) return void wx.showToast({
+            title: "删除失败，请重试",
+            icon: "none"
+        });
+        this.loadSkills(), wx.showModal({
+            title: "已删除技能",
+            content: "「".concat(o.name, "」已删除，可撤销。"),
+            confirmText: "知道了",
+            cancelText: "撤销",
             success: function(t) {
-                if (t.confirm) {
-                    var s = plainSkills(e.data.skills).filter(function(t) {
-                        return t.id !== i;
-                    });
-                    a.updateData("skills", s), e.loadSkills();
+                if (t.cancel) {
+                    var i = plainSkills(e.data.skills);
+                    i.splice(n, 0, o), a.updateData("skills", i) && (e.loadSkills(), wx.showToast({
+                        title: "已撤销删除",
+                        icon: "none"
+                    }));
                 }
             }
         });
     },
     closeModal: function() {
-        this.setData({
+        var t = this;
+        if (this.data.showModal && this._dirty) return void wx.showModal({
+            title: "放弃编辑？",
+            content: "当前修改还没有保存，关闭后会丢失。",
+            confirmText: "放弃修改",
+            cancelText: "继续编辑",
+            success: function(e) {
+                e.confirm && (t._dirty = !1, t.setData({
+                    showModal: !1
+                }));
+            }
+        });
+        this._dirty = !1, this.setData({
             showModal: !1
         });
     },
     stopPropagation: function() {},
     onNameInput: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.name": t.detail.value
         });
     },
     onCategoryChange: function(t) {
         var e = t.detail.value;
-        this.setData({
+        this._dirty = !0, this.setData({
             categoryIndex: e,
             "formData.category": this.data.categories[e]
         });
     },
     onLevelChange: function(t) {
         var e = t.detail.value;
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.level": e
         }), this.updateLevelHint(e);
     },
@@ -205,7 +233,7 @@ Page({
         });
     },
     onNoteInput: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.note": t.detail.value
         });
     },
@@ -217,7 +245,7 @@ Page({
         });
     },
     fillNote: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.note": t.currentTarget.dataset.text,
             showNoteSuggestions: !1
         });
@@ -247,7 +275,7 @@ Page({
             title: "保存失败，请重试",
             icon: "none"
         });
-        this.loadSkills(), this.closeModal(), wx.showToast({
+        this._dirty = !1, this.loadSkills(), this.closeModal(), wx.showToast({
             title: "保存成功",
             icon: "success"
         });

@@ -33,6 +33,11 @@
                         <view class="subtask-text {{subtask.done?'done':''}}">{{subtask.text}}</view>
                     </view>
                 </view>
+                <view style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12rpx;">
+                    <text style="color:#64748b;font-size:24rpx;" wx:if="{{goal.subtaskTotal>0}}">步骤 {{goal.subtaskDone}}/{{goal.subtaskTotal}} 已完成</text>
+                    <text style="color:#475569;font-size:24rpx;" wx:else>还没有拆解步骤</text>
+                    <view bindtap="openStepsModal" class="btn btn-ai btn-sm" data-id="{{goal.id}}">🧩 拆解步骤</view>
+                </view>
                 <view class="progress-bar">
                     <view class="progress-fill" style="width:{{goal.progress}}%"></view>
                 </view>
@@ -96,7 +101,7 @@
             </view>
         </view>
         <view class="form-group">
-            <view class="form-label">拆解为子任务<view bindtap="generateSubtasks" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 拆解</view>
+            <view class="form-label">拆解为步骤<view bindtap="generateSubtasks" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 拆解</view>
             </view>
             <view wx:if="{{formData.subtasks.length>0}}">
                 <view class="subtask-item" wx:for="{{formData.subtasks}}" wx:key="index">
@@ -115,6 +120,41 @@
         <view class="modal-footer">
             <view bindtap="closeModal" class="btn btn-secondary">取消</view>
             <view bindtap="saveGoal" class="btn btn-primary">保存</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeStepsModal" class="modal-mask" wx:if="{{showStepsModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">拆解步骤</view>
+            <view bindtap="closeStepsModal" class="modal-close">✕</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">目标</view>
+            <view style="color:#e2e8f0;font-size:28rpx;">{{stepsGoalTitle}}</view>
+            <view style="color:#64748b;font-size:24rpx;margin-top:8rpx;">把大目标拆成 3-6 个可以勾选的小步骤，进度会自动计算。</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">步骤列表<view bindtap="generateSteps" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 拆解</view>
+            </view>
+            <block wx:if="{{stepsForm.subtasks.length>0}}">
+                <view class="step-row" wx:for="{{stepsForm.subtasks}}" wx:key="index">
+                    <view class="step-index">{{index+1}}</view>
+                    <view bindtap="toggleStepDone" class="checkbox {{item.done?'checked':''}}" data-index="{{index}}"></view>
+                    <input bindinput="onStepInput" class="form-input" data-index="{{index}}" style="flex:1;padding:12rpx 16rpx;" value="{{item.text}}"></input>
+                    <view bindtap="moveStep" class="btn btn-secondary btn-sm" data-index="{{index}}" data-dir="-1" wx:if="{{index>0}}">↑</view>
+                    <view bindtap="moveStep" class="btn btn-secondary btn-sm" data-index="{{index}}" data-dir="1" wx:if="{{index<stepsForm.subtasks.length-1}}">↓</view>
+                    <view bindtap="removeStep" class="btn btn-danger btn-sm" data-index="{{index}}">✕</view>
+                </view>
+            </block>
+            <view class="empty-state" style="padding:24rpx 0;" wx:else>
+                <view class="text">还没有步骤，点「AI 拆解」或手动添加</view>
+            </view>
+            <view bindtap="addStep" class="btn btn-secondary btn-sm" style="margin-top:12rpx;">+ 添加步骤</view>
+        </view>
+        <view class="modal-footer">
+            <view bindtap="closeStepsModal" class="btn btn-secondary">取消</view>
+            <view bindtap="saveSteps" class="btn btn-primary">保存步骤</view>
         </view>
     </view>
 </view>

@@ -1,0 +1,88 @@
+/* 设置页专用样式（其余复用 app.wxss 全局样式） */
+.card-title {
+    margin-bottom: 20rpx;
+}
+
+.card-title .btn-text {
+    margin-left: auto;
+}
+
+.title-text {
+    color: #f1f5f9;
+    font-size: 32rpx;
+    font-weight: 600;
+}
+
+.btn-text {
+    color: #06b6d4;
+    font-size: 26rpx;
+    padding: 4rpx 8rpx;
+}
+
+.form-hint {
+    color: #94a3b8;
+    font-size: 24rpx;
+    line-height: 1.7;
+    margin-top: 12rpx;
+}
+
+.tool-row {
+    display: flex;
+    gap: 16rpx;
+    margin-top: 24rpx;
+}
+
+.import-textarea {
+    font-size: 24rpx;
+    margin-top: 16rpx;
+    min-height: 200rpx;
+}
+
+.import-placeholder {
+    color: #475569;
+}
+
+.import-preview {
+    color: #06b6d4;
+}
+
+.backup-item {
+    align-items: center;
+    border-bottom: 1rpx solid #2d3748;
+    display: flex;
+    gap: 16rpx;
+    justify-content: space-between;
+    padding: 20rpx 0;
+}
+
+.backup-item:last-child {
+    border-bottom: none;
+}
+
+.backup-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.backup-time {
+    color: #f1f5f9;
+    font-size: 26rpx;
+    font-weight: 500;
+}
+
+.backup-label {
+    color: #64748b;
+    font-size: 22rpx;
+}
+
+.backup-counts {
+    color: #94a3b8;
+    font-size: 22rpx;
+    margin-top: 4rpx;
+}
+
+.backup-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 12rpx;
+}

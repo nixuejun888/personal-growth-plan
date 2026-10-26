@@ -26,6 +26,43 @@ function plainGoals(e) {
     return (e || []).map(plainGoal);
 }
 
+/* 按步骤完成情况计算目标进度与状态：全部完成→done，有进展→progress，全未开始→pending */
+function computeProgress(e) {
+    var t = e || [], a = t.length;
+    if (!a) return {
+        progress: 0,
+        status: "pending",
+        done: 0,
+        total: 0
+    };
+    var i = t.filter(function(t) {
+        return t.done;
+    }).length, n = Math.round(i / a * 100);
+    return {
+        progress: n,
+        status: 100 === n ? "done" : n > 0 ? "progress" : "pending",
+        done: i,
+        total: a
+    };
+}
+
+/* AI 拆解步骤：优先匹配内置模板，匹配不到时给通用模板 */
+function buildStepTemplate(e) {
+    for (var t = a.subtaskTemplates, i = e || "", n = null, s = Object.keys(t), o = 0; o < s.length; o++) {
+        var r = s[o];
+        if (i.includes(r) || r.includes(i)) {
+            n = t[r];
+            break;
+        }
+    }
+    return (n || [ "调研和了解「".concat(i || "目标", "」的相关信息"), "制定详细的学习/执行计划", "执行第一阶段，完成基础内容", "中期检查，调整方向和节奏", "冲刺阶段，集中攻克难点", "总结复盘，输出成果" ]).map(function(t) {
+        return {
+            text: t,
+            done: !1
+        };
+    });
+}
+
 Page({
     data: {
         goals: [],
@@ -34,6 +71,12 @@ Page({
         showModal: !1,
         isEdit: !1,
         editId: "",
+        showStepsModal: !1,
+        stepsGoalId: "",
+        stepsGoalTitle: "",
+        stepsForm: {
+            subtasks: []
+        },
         formData: {
             title: "",
             term: "short",
@@ -107,9 +150,14 @@ Page({
     },
     loadGoals: function() {
         var t = this, a = (s.getData().goals || []).map(function(s) {
+            var a = s.subtasks || [];
             return e(e({}, s), {}, {
                 termText: t.getTermText(s.term),
-                statusText: t.getStatusText(s.status)
+                statusText: t.getStatusText(s.status),
+                subtaskTotal: a.length,
+                subtaskDone: a.filter(function(t) {
+                    return t.done;
+                }).length
             });
         });
         this.setData({
@@ -152,10 +200,10 @@ Page({
             "formData.title": s,
             "formData.term": a,
             termIndex: i >= 0 ? i : 0
-        });
+        }), this._dirty = !0;
     },
     openAddModal: function() {
-        this.setData({
+        this._dirty = !1, this.setData({
             showModal: !0,
             isEdit: !1,
             editId: "",
@@ -183,7 +231,7 @@ Page({
             }), i = this.data.statusOptions.findIndex(function(t) {
                 return t.value === s.status;
             });
-            this.setData({
+            this._dirty = !1, this.setData({
                 showModal: !0,
                 isEdit: !0,
                 editId: e,
@@ -203,28 +251,179 @@ Page({
         }
     },
     deleteGoal: function(t) {
-        var e = this, a = t.currentTarget.dataset.id;
-        wx.showModal({
-            title: "确认删除",
-            content: "确定要删除这个目标吗？",
+        var e = this, a = t.currentTarget.dataset.id, i = plainGoals(this.data.goals), n = i.findIndex(function(t) {
+            return t.id === a;
+        });
+        if (n < 0) return void wx.showToast({
+            title: "目标不存在，请刷新后重试",
+            icon: "none"
+        });
+        var o = i[n], r = i.filter(function(t) {
+            return t.id !== a;
+        });
+        if (!s.updateData("goals", r)) return void wx.showToast({
+            title: "删除失败，请重试",
+            icon: "none"
+        });
+        this.loadGoals(), wx.showModal({
+            title: "已删除目标",
+            content: "「".concat(o.title, "」已删除，可撤销。"),
+            confirmText: "知道了",
+            cancelText: "撤销",
             success: function(t) {
-                if (t.confirm) {
-                    var i = plainGoals(e.data.goals).filter(function(t) {
-                        return t.id !== a;
-                    });
-                    s.updateData("goals", i), e.loadGoals();
+                if (t.cancel) {
+                    var a = plainGoals(e.data.goals);
+                    a.splice(n, 0, o), s.updateData("goals", a) && (e.loadGoals(), wx.showToast({
+                        title: "已撤销删除",
+                        icon: "none"
+                    }));
                 }
             }
         });
     },
+    openStepsModal: function(t) {
+        var e = t.currentTarget.dataset.id, s = this.data.goals.find(function(t) {
+            return t.id === e;
+        });
+        s && (this._dirty = !1, this.setData({
+            showStepsModal: !0,
+            stepsGoalId: e,
+            stepsGoalTitle: s.title,
+            stepsForm: {
+                subtasks: cloneData(s.subtasks || [])
+            }
+        }));
+    },
+    closeStepsModal: function() {
+        var t = this;
+        if (this.data.showStepsModal && this._dirty) return void wx.showModal({
+            title: "放弃编辑？",
+            content: "步骤修改还没有保存，关闭后会丢失。",
+            confirmText: "放弃修改",
+            cancelText: "继续编辑",
+            success: function(e) {
+                e.confirm && (t._dirty = !1, t.setData({
+                    showStepsModal: !1
+                }));
+            }
+        });
+        this._dirty = !1, this.setData({
+            showStepsModal: !1
+        });
+    },
+    addStep: function() {
+        var e = [].concat(t(this.data.stepsForm.subtasks), [ {
+            text: "",
+            done: !1
+        } ]);
+        this._dirty = !0, this.setData({
+            "stepsForm.subtasks": e
+        });
+    },
+    removeStep: function(t) {
+        var e = t.currentTarget.dataset.index, s = this.data.stepsForm.subtasks.filter(function(t, s) {
+            return s !== e;
+        });
+        this._dirty = !0, this.setData({
+            "stepsForm.subtasks": s
+        });
+    },
+    onStepInput: function(t) {
+        var e = t.currentTarget.dataset.index, s = t.detail.value, a = (this.data.stepsForm.subtasks || []).map(function(t, a) {
+            return a === e ? {
+                text: s,
+                done: t.done
+            } : t;
+        });
+        this._dirty = !0, this.setData({
+            "stepsForm.subtasks": a
+        });
+    },
+    toggleStepDone: function(t) {
+        var e = t.currentTarget.dataset.index, s = this.data.stepsForm.subtasks.map(function(t, s) {
+            return s === e ? {
+                text: t.text,
+                done: !t.done
+            } : t;
+        });
+        this._dirty = !0, this.setData({
+            "stepsForm.subtasks": s
+        });
+    },
+    moveStep: function(t) {
+        var e = t.currentTarget.dataset.index, s = parseInt(t.currentTarget.dataset.dir, 10), a = this.data.stepsForm.subtasks.slice(), i = e + s;
+        if (!(i < 0 || i >= a.length)) {
+            var n = a[e];
+            a[e] = a[i], a[i] = n, this._dirty = !0, this.setData({
+                "stepsForm.subtasks": a
+            });
+        }
+    },
+    generateSteps: function() {
+        var t = this, e = buildStepTemplate(this.data.stepsGoalTitle), s = function() {
+            t._dirty = !0, t.setData({
+                "stepsForm.subtasks": e
+            }), wx.showToast({
+                title: "已生成步骤，可上下调整顺序",
+                icon: "none"
+            });
+        };
+        this.data.stepsForm.subtasks.length > 0 ? wx.showModal({
+            title: "重新生成步骤？",
+            content: "AI 拆解会替换当前步骤列表，已有内容会被覆盖。",
+            confirmText: "重新生成",
+            cancelText: "取消",
+            success: function(t) {
+                t.confirm && s();
+            }
+        }) : s();
+    },
+    saveSteps: function() {
+        var t = this.data.stepsGoalId, e = (this.data.stepsForm.subtasks || []).filter(function(t) {
+            return t.text.trim();
+        }).map(function(t) {
+            return {
+                text: t.text.trim(),
+                done: !!t.done
+            };
+        }), a = plainGoals(this.data.goals), i = a.findIndex(function(e) {
+            return e.id === t;
+        });
+        if (i < 0) return void wx.showToast({
+            title: "目标不存在，请刷新后重试",
+            icon: "none"
+        });
+        a[i].subtasks = e;
+        var n = computeProgress(e);
+        if (n && (a[i].progress = n.progress, a[i].status = n.status), !s.updateData("goals", a)) return void wx.showToast({
+            title: "保存失败，请重试",
+            icon: "none"
+        });
+        this._dirty = !1, this.loadGoals(), this.closeStepsModal(), wx.showToast({
+            title: e.length ? "步骤已保存" : "已清空步骤",
+            icon: "success"
+        });
+    },
     closeModal: function() {
-        this.setData({
+        var t = this;
+        if (this.data.showModal && this._dirty) return void wx.showModal({
+            title: "放弃编辑？",
+            content: "当前修改还没有保存，关闭后会丢失。",
+            confirmText: "放弃修改",
+            cancelText: "继续编辑",
+            success: function(e) {
+                e.confirm && (t._dirty = !1, t.setData({
+                    showModal: !1
+                }));
+            }
+        });
+        this._dirty = !1, this.setData({
             showModal: !1
         });
     },
     stopPropagation: function() {},
     onTitleInput: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.title": t.detail.value
         });
     },
@@ -239,20 +438,20 @@ Page({
         });
     },
     fillTitle: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.title": t.currentTarget.dataset.text,
             showTitleSuggestions: !1
         });
     },
     onTermChange: function(t) {
         var e = t.detail.value;
-        this.setData({
+        this._dirty = !0, this.setData({
             termIndex: e,
             "formData.term": this.data.termOptions[e].value
         });
     },
     onDescInput: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.desc": t.detail.value
         });
     },
@@ -262,40 +461,26 @@ Page({
         });
     },
     fillDescTemplate: function() {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.desc": "【目标结果】\n\n\n【衡量标准】\n\n\n【关键路径】\n1. \n2. \n3. \n\n【预期收获】\n",
             showDescFramework: !1
         });
     },
     onProgressChange: function(t) {
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.progress": t.detail.value
         });
     },
     onStatusChange: function(t) {
         var e = t.detail.value;
-        this.setData({
+        this._dirty = !0, this.setData({
             statusIndex: e,
             "formData.status": this.data.statusOptions[e].value
         });
     },
     generateSubtasks: function() {
-        for (var t = this.data.formData.title, e = null, s = 0, i = Object.keys(a.subtaskTemplates); s < i.length; s++) {
-            var n = i[s];
-            if (t.includes(n) || n.includes(t)) {
-                e = a.subtaskTemplates[n];
-                break;
-            }
-        }
-        e || (e = [ "调研和了解「".concat(t || "目标", "」的相关信息"), "制定详细的学习/执行计划", "执行第一阶段，完成基础内容", "中期检查，调整方向和节奏", "冲刺阶段，集中攻克难点", "总结复盘，输出成果" ]);
-        var o = e.map(function(t) {
-            return {
-                text: t,
-                done: !1
-            };
-        });
-        this.setData({
-            "formData.subtasks": o
+        this._dirty = !0, this.setData({
+            "formData.subtasks": buildStepTemplate(this.data.formData.title)
         });
     },
     addSubtask: function() {
@@ -303,7 +488,7 @@ Page({
             text: "",
             done: !1
         } ]);
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.subtasks": e
         });
     },
@@ -311,7 +496,7 @@ Page({
         var e = t.currentTarget.dataset.index, s = this.data.formData.subtasks.filter(function(t, s) {
             return s !== e;
         });
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.subtasks": s
         });
     },
@@ -322,7 +507,7 @@ Page({
                 done: t.done
             } : t;
         });
-        this.setData({
+        this._dirty = !0, this.setData({
             "formData.subtasks": i
         });
     },
@@ -379,7 +564,7 @@ Page({
             title: "保存失败，请重试",
             icon: "none"
         });
-        this.loadGoals(), this.closeModal(), wx.showToast({
+        this._dirty = !1, this.loadGoals(), this.closeModal(), wx.showToast({
             title: "保存成功",
             icon: "success"
         });

@@ -53,3 +53,9 @@ v1（4/29）与 v2（6/10）唯一差异在 `pages/goals/goals.wxml`：v2 在目
 恢复出源码后，针对用户反馈的「数据保存 / 读取异常（保存不上、丢失、重复）」做了数据层 E2E 复现并修复了 4 类缺陷（复盘列表原地反转、取消编辑污染共享数据、展示字段写进 storage、总览进行中目标统计口径），另修复进度/状态不一致、quickAddGoal 竞态、Date.now 撞 ID 等问题，并给数据层加了规范化与迁移清洗。详见 [FIXES.md](FIXES.md)。
 
 验证：wcc/wcsc 官方编译器通过；automator E2E 39/39 通过；测试数据已清空。
+
+## 后续功能演进（2026-10-26）
+
+- v1.2：数据导出/导入、本地备份（5 份）、删除撤销、未保存提醒、数据层模块化（`utils/store.js`）、页面 JS 可读化。
+- v1.3：目标拆解步骤、分年愿景（旧 `vision.year1/year3` 自动迁移为 `vision.years`）、成长洞察引擎（`utils/insight.js`）。
+- 全量 E2E 扩展到 113 项断言（5 个 automator 套件），全部通过。详见 [FIXES.md](FIXES.md) 与工程 `tests/e2e/`。

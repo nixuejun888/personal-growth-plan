@@ -1,138 +1,122 @@
-var t = require("../../@babel/runtime/helpers/toConsumableArray"), e = require("../../@babel/runtime/helpers/objectSpread2"), n = getApp(), s = require("../../utils/aiDB");
+/**
+ * 总览页（2026-10-26 重构为可读版本）
+ * 数据全部来自 app.globalData 的只读快照，不直接改写数据。
+ * 成长洞察：由 utils/insight.js 的规则引擎基于当前数据生成，点击可跳转对应页面。
+ */
+var app = getApp();
+var aiDB = require('../../utils/aiDB');
+var insight = require('../../utils/insight');
+
+var TERM_TEXT = { short: '短期', mid: '中期', long: '长期' };
+var STATUS_TEXT = { pending: '待开始', progress: '进行中', done: '已完成' };
+var MAX_INSIGHTS = 6;
 
 Page({
-    data: {
-        stats: {
-            totalSkills: 0,
-            activeGoals: 0,
-            completedGoals: 0,
-            reviewCount: 0
-        },
-        recentGoals: [],
-        topSkills: [],
-        insights: [],
-        aiPanelOpen: !1
-    },
-    onShow: function() {
-        this.loadData();
-    },
-    loadData: function() {
-        var s = this, l = n.getData(), i = {
-            totalSkills: l.skills ? l.skills.length : 0,
-            /* 未完成（待开始/进行中）的目标都计入「进行中目标」，避免新建目标统计为 0 */
-            activeGoals: l.goals ? l.goals.filter(function(t) {
-                return "done" !== t.status;
-            }).length : 0,
-            completedGoals: l.goals ? l.goals.filter(function(t) {
-                return "done" === t.status;
-            }).length : 0,
-            reviewCount: l.reviews ? l.reviews.length : 0
-        }, a = (l.goals || []).filter(function(t) {
-            return "done" !== t.status;
-        }).slice(0, 3).map(function(t) {
-            return e(e({}, t), {}, {
-                termText: s.getTermText(t.term),
-                statusText: s.getStatusText(t.status)
-            });
-        }), o = t(l.skills || []).sort(function(t, e) {
-            return e.level - t.level;
-        }).slice(0, 5), r = this.generateInsights(l);
-        this.setData({
-            stats: i,
-            recentGoals: a,
-            topSkills: o,
-            insights: r
-        });
-    },
-    getTermText: function(t) {
-        return {
-            short: "短期",
-            mid: "中期",
-            long: "长期"
-        }[t] || t;
-    },
-    getStatusText: function(t) {
-        return {
-            pending: "待开始",
-            progress: "进行中",
-            done: "已完成"
-        }[t] || t;
-    },
-    generateInsights: function(e) {
-        var n = [];
-        if (e.skills && e.skills.length > 0) {
-            var s = Math.round(e.skills.reduce(function(t, e) {
-                return t + e.level;
-            }, 0) / e.skills.length), l = t(e.skills).sort(function(t, e) {
-                return e.level - t.level;
-            })[0], i = t(e.skills).sort(function(t, e) {
-                return t.level - e.level;
-            })[0];
-            n.push({
-                title: "📊 技能画像",
-                content: "共 ".concat(e.skills.length, " 项技能，均值 ").concat(s, "%。最强：").concat(l.name, "（").concat(l.level, "%），待提升：").concat(i.name, "（").concat(i.level, "%）。").concat(s < 50 ? "建议选1-2项核心技能重点突破。" : "保持优势，持续深耕。")
-            });
-        }
-        if (e.goals && e.goals.length > 0) {
-            var a = e.goals.filter(function(t) {
-                return "done" === t.status;
-            }).length, o = Math.round(a / e.goals.length * 100);
-            n.push({
-                title: "🎯 目标达成",
-                content: "".concat(e.goals.length, " 个目标中已完成 ").concat(a, " 个（").concat(o, "%）。").concat(o < 30 ? "建议聚焦短期目标，先拿到小胜利建立信心。" : o > 70 ? "完成率很高！可以挑战更有难度的目标了。" : "稳步推进中，注意定期检查进度。")
-            });
-        }
-        if (e.reviews && e.reviews.length > 0) {
-            var r = (e.reviews.reduce(function(t, e) {
-                return t + parseInt(e.score);
-            }, 0) / e.reviews.length).toFixed(1);
-            n.push({
-                title: "📝 复盘趋势",
-                content: "已完成 ".concat(e.reviews.length, " 次复盘，均分 ").concat(r, "/10。").concat(e.reviews.length >= 4 ? "坚持得很好！建议每月对比一次复盘记录，发现成长趋势。" : "建议每周固定时间复盘，坚持4周以上就能形成习惯。")
-            });
-        }
-        return 0 === n.length && n.push({
-            title: "🚀 开始你的成长之旅",
-            content: "点击顶部「AI 成长顾问」，让 AI 引导你完成第一步：盘点技能、设定目标、规划方向。"
-        }), n;
-    },
-    generateInsight: function() {
-        var e = {
-            title: "✦ AI 建议",
-            content: s.overviewInsights[Math.floor(Math.random() * s.overviewInsights.length)]
-        };
-        this.setData({
-            insights: [ e ].concat(t(this.data.insights))
-        });
-    },
-    openAiPanel: function() {
-        this.setData({
-            aiPanelOpen: !0
-        });
-    },
-    closeAiPanel: function() {
-        this.setData({
-            aiPanelOpen: !1
-        });
-    },
-    goToSkills: function() {
-        wx.switchTab({
-            url: "/pages/skills/skills"
-        });
-    },
-    goToGoals: function() {
-        wx.switchTab({
-            url: "/pages/goals/goals"
-        });
-    },
-    goToReview: function() {
-        wx.switchTab({
-            url: "/pages/review/review"
-        });
-    },
-    goToDirection: function() {
-        wx.switchTab({
-            url: "/pages/direction/direction"
-        });
+  data: {
+    stats: { totalSkills: 0, activeGoals: 0, completedGoals: 0, reviewCount: 0 },
+    recentGoals: [],
+    topSkills: [],
+    insights: [],
+    aiPanelOpen: false
+  },
+
+  onShow: function () {
+    this.loadData();
+  },
+
+  loadData: function () {
+    var data = app.getData();
+    var goals = data.goals || [];
+    var skills = data.skills || [];
+    var reviews = data.reviews || [];
+
+    var stats = {
+      totalSkills: skills.length,
+      // 未完成（待开始/进行中）都计入「进行中目标」，与用户直觉一致
+      activeGoals: goals.filter(function (goal) { return goal.status !== 'done'; }).length,
+      completedGoals: goals.filter(function (goal) { return goal.status === 'done'; }).length,
+      reviewCount: reviews.length
+    };
+
+    var recentGoals = goals.filter(function (goal) {
+      return goal.status !== 'done';
+    }).slice(0, 3).map(function (goal) {
+      return {
+        id: goal.id,
+        title: goal.title,
+        term: goal.term,
+        status: goal.status,
+        progress: goal.progress,
+        termText: TERM_TEXT[goal.term] || goal.term,
+        statusText: STATUS_TEXT[goal.status] || goal.status
+      };
+    });
+
+    var topSkills = skills.slice().sort(function (a, b) {
+      return b.level - a.level;
+    }).slice(0, 5);
+
+    this.setData({
+      stats: stats,
+      recentGoals: recentGoals,
+      topSkills: topSkills,
+      insights: insight.buildInsights(data)
+    });
+  },
+
+  /** 手动插入一条 AI 小建议：去重、限长，避免无限累积。 */
+  generateInsight: function () {
+    var pool = aiDB.overviewInsights || [];
+    if (!pool.length) return;
+    var picked = pool[Math.floor(Math.random() * pool.length)];
+    var exists = this.data.insights.some(function (item) { return item.content === picked; });
+    if (exists) {
+      wx.showToast({ title: '已经给过类似建议啦', icon: 'none' });
+      return;
     }
+    var next = [{ type: 'ai', title: '✦ AI 建议', content: picked, action: '' }].concat(this.data.insights);
+    this.setData({ insights: next.slice(0, MAX_INSIGHTS) });
+  },
+
+  /** 点击洞察条目跳转到对应页面。 */
+  onInsightTap: function (event) {
+    var action = event.currentTarget.dataset.action;
+    if (!action) return;
+    var routes = {
+      goals: this.goToGoals,
+      skills: this.goToSkills,
+      review: this.goToReview,
+      direction: this.goToDirection
+    };
+    var handler = routes[action];
+    if (handler) handler.call(this);
+  },
+
+  openAiPanel: function () {
+    this.setData({ aiPanelOpen: true });
+  },
+
+  closeAiPanel: function () {
+    this.setData({ aiPanelOpen: false });
+  },
+
+  goToSettings: function () {
+    wx.navigateTo({ url: '/pages/settings/settings' });
+  },
+
+  goToSkills: function () {
+    wx.switchTab({ url: '/pages/skills/skills' });
+  },
+
+  goToGoals: function () {
+    wx.switchTab({ url: '/pages/goals/goals' });
+  },
+
+  goToReview: function () {
+    wx.switchTab({ url: '/pages/review/review' });
+  },
+
+  goToDirection: function () {
+    wx.switchTab({ url: '/pages/direction/direction' });
+  }
 });

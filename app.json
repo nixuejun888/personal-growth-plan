@@ -4,7 +4,8 @@
     "pages/skills/skills",
     "pages/goals/goals",
     "pages/review/review",
-    "pages/direction/direction"
+    "pages/direction/direction",
+    "pages/settings/settings"
   ],
   "window": {
     "backgroundTextStyle": "dark",

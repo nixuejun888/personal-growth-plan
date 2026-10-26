@@ -1,0 +1,8 @@
+{
+  "name": "personal-growth-plan-tests",
+  "private": true,
+  "description": "miniprogram-automator E2E suites for personal-growth-plan",
+  "devDependencies": {
+    "miniprogram-automator": "^0.13.0"
+  }
+}

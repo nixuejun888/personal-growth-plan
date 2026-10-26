@@ -1,16 +1,53 @@
 # 个人成长规划系统（personal-growth-plan）
 
-微信小程序源码工程。2026-10-26 从**已发布代码包**（AppID `wx57607a802e684006`，最后上传 2026-06-10）完整反编译恢复。
+微信小程序，用于技能盘点、目标管理、定期复盘与长期方向规划。**数据只存在手机本地**（`wx.setStorageSync`），无后端、无云开发、不联网。
 
-- 恢复过程、可信度说明、已知差异：见 [docs/RECOVERY.md](docs/RECOVERY.md)
-- 数据问题修复记录、验证结果、后续优化建议：见 [docs/FIXES.md](docs/FIXES.md)
-- 运行：微信开发者工具 → 导入项目 → 选择本目录，AppID 填 `wx57607a802e684006`
-- 数据全部存本机 storage（key `growthPlannerData`），无后端、无云开发、无网络请求
-- 「AI 引导」是 `utils/aiDB.js` 里的内置规则模板，不是真的 AI 接口
+> 本工程 2026-10-26 从已发布代码包（AppID `wx57607a802e684006`，最后上传 2026-06-10）反编译恢复，并在此基础上重构数据层、修复数据 bug、增加功能。
+> 恢复过程与可信度说明：[docs/RECOVERY.md](docs/RECOVERY.md)；数据修复与功能记录：[docs/FIXES.md](docs/FIXES.md)。
 
-## 首次使用前
+## 功能
 
-```bash
-git log --oneline          # 恢复提交 + 数据修复提交均在
-git status                 # 应为 clean
+| 页面 | 功能 |
+| ---- | ---- |
+| 总览 | 统计卡片、近期目标、技能概览、**成长洞察**（按数据自动生成 6 条以内建议，可点击跳转）、AI 引导文案 |
+| 目标 | 新建/编辑/删除（删除可撤销）、可按「短期/中期/长期」筛选；**拆解步骤**：为每个目标维护 3-6 个可勾选步骤，进度与状态随步骤完成度自动变化 |
+| 技能 | 技能清单、按分类筛选、熟练度滑块、AI 引导填写 |
+| 复盘 | 记录成就/挑战/学到/计划/评分，按时间倒序展示 |
+| 方向 | 个人愿景（**分年愿景**：任意年份 + 文案）、核心价值观、发展路径、行动计划（过期提醒） |
+| 设置 | 数据导出（复制 JSON）、导入（校验 + 覆盖 + 自动备份）、本地备份（最多 5 份，可恢复/删除）、存储占用 |
+
+## 目录结构
+
 ```
+app.js / app.json / app.wxss   # 入口、页面/窗口/tabBar 配置、全局样式
+pages/                         # overview 总览、goals 目标、skills 技能、review 复盘、direction 方向、settings 设置
+utils/store.js                 # 数据层：规范化/迁移、导入导出、备份（核心）
+utils/insight.js               # 成长洞察规则引擎（纯函数）
+utils/aiDB.js                  # AI 引导文案模板
+images/                        # tabBar 图标
+docs/                          # 恢复说明、修复与功能记录
+tests/e2e/                     # miniprogram-automator 端到端测试（不参与打包）
+```
+
+## 运行
+
+1. 微信开发者工具 → 导入项目 → 选择本目录，AppID 填 `wx57607a802e684006`（或改为你自己的 AppID）。
+2. 基础库 ≥ `3.15.2`（`project.config.json` 已配置）。
+3. 修改代码后建议重启一次开发者工具（外部改文件时工具不会可靠地自动编译）。
+
+## 数据与隐私
+
+- 存储 key：`growthPlannerData`（业务数据）、`growthPlannerDataBackups`（本地备份）。
+- 读取时会做结构规范化：旧版本数据自动迁移（包括把旧 `vision.year1/year3` 迁移为 `vision.years`），并剥离历史遗留的展示字段。
+- 换手机/卸载重装前，请先到「设置 → 导出数据」保存一份 JSON。
+
+## 测试
+
+`tests/e2e/` 下是基于 [miniprogram-automator](https://developers.weixin.qq.com/miniprogram/dev/devtools/auto/) 的端到端测试（需要先 `npm i miniprogram-automator`，并按 `tests/e2e/README.md` 开启自动化端口）。当前覆盖 39 + 15 + 23 + 12 + 24 = 113 项断言，全部通过。
+
+## 版本
+
+- v1.0.0：从已发布包恢复的原始版本（数据 bug 存在）。
+- v1.1.0：修复 4 类数据问题（复盘顺序反转、取消编辑泄漏、展示字段入库、总览统计）+ 存储规范化/迁移。
+- v1.2.0：数据导出/导入/本地备份、删除撤销、表单未保存提醒、页面 JS 可读化、自动化测试。
+- v1.3.0：目标拆解步骤、分年愿景、成长洞察引擎（当前版本）。

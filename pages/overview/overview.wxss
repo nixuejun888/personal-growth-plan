@@ -5,3 +5,38 @@
 .ai-hint:active {
     opacity: .8;
 }
+
+/* 顶部工具入口（数据备份与恢复） */
+.tool-links {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16rpx;
+}
+
+.tool-link {
+    background: #1a2332;
+    border: 1rpx solid #2d3748;
+    border-radius: 999rpx;
+    color: #94a3b8;
+    font-size: 24rpx;
+    padding: 10rpx 24rpx;
+}
+
+.tool-link:active {
+    opacity: .8;
+}
+
+/* 成长洞察：整卡可点击，focus 类型高亮 */
+.insight-card:active {
+    opacity: .85;
+}
+
+.insight-card.focus {
+    border-color: rgba(6, 182, 212, .55);
+}
+
+.insight-link {
+    margin-top: 10rpx;
+    color: #06b6d4;
+    font-size: 24rpx;
+}

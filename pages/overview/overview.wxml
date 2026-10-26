@@ -1,4 +1,7 @@
 <view class="container">
+    <view class="tool-links">
+        <view class="tool-link" bindtap="goToSettings">⚙️ 数据备份与恢复</view>
+    </view>
     <view class="stats-grid">
         <view class="stat-card">
             <view class="stat-value">{{stats.totalSkills}}</view>
@@ -75,9 +78,10 @@
                 <view class="icon">💡</view>成长洞察</view>
             <view bindtap="generateInsight" class="btn btn-ai btn-sm">AI 分析</view>
         </view>
-        <view class="insight-card" wx:for="{{insights}}" wx:key="index">
+        <view class="insight-card {{item.type}}" wx:for="{{insights}}" wx:key="index" bindtap="onInsightTap" data-action="{{item.action}}">
             <view class="insight-title">{{item.title}}</view>
             <view class="insight-content">{{item.content}}</view>
+            <view class="insight-link" wx:if="{{item.action}}">去处理 ›</view>
         </view>
     </view>
 </view>
