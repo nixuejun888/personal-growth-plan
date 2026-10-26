@@ -23,7 +23,8 @@ Page({
         this.loadReviews();
     },
     loadReviews: function() {
-        var e = (n.getData().reviews || []).reverse();
+        /* 用 slice() 复制后再反转，避免 onShow 反复把全局数组原地倒序 */
+        var e = (n.getData().reviews || []).slice().reverse();
         this.setData({
             reviews: e
         });
@@ -90,17 +91,26 @@ Page({
     },
     saveReview: function() {
         var a = this.data.formData;
-        if (a.date) {
-            var i = t(t({}, a), {}, {
-                id: Date.now().toString()
-            }), o = n.getData(), s = [].concat(e(o.reviews || []), [ i ]);
-            n.updateData("reviews", s), this.loadReviews(), this.closeModal(), wx.showToast({
-                title: "保存成功",
-                icon: "success"
-            });
-        } else wx.showToast({
+        if (!a.date) return void wx.showToast({
             title: "请选择复盘日期",
             icon: "none"
+        });
+        var i = {
+            date: a.date,
+            achievement: a.achievement,
+            challenge: a.challenge,
+            learning: a.learning,
+            plan: a.plan,
+            score: a.score,
+            id: n.genId()
+        }, o = n.getData(), s = [].concat(e(o.reviews || []), [ i ]);
+        if (!n.updateData("reviews", s)) return void wx.showToast({
+            title: "保存失败，请重试",
+            icon: "none"
+        });
+        this.loadReviews(), this.closeModal(), wx.showToast({
+            title: "保存成功",
+            icon: "success"
         });
     },
     deleteReview: function(e) {

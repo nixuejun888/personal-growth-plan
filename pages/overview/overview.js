@@ -19,8 +19,9 @@ Page({
     loadData: function() {
         var s = this, l = n.getData(), i = {
             totalSkills: l.skills ? l.skills.length : 0,
+            /* 未完成（待开始/进行中）的目标都计入「进行中目标」，避免新建目标统计为 0 */
             activeGoals: l.goals ? l.goals.filter(function(t) {
-                return "progress" === t.status;
+                return "done" !== t.status;
             }).length : 0,
             completedGoals: l.goals ? l.goals.filter(function(t) {
                 return "done" === t.status;

@@ -4,6 +4,28 @@ require("../../@babel/runtime/helpers/Arrayincludes");
 
 var e = require("../../@babel/runtime/helpers/objectSpread2"), s = getApp(), a = require("../../utils/aiDB");
 
+/* 深拷贝，避免弹窗表单与 globalData 共享子任务对象（取消编辑时污染数据） */
+function cloneData(e) {
+    return JSON.parse(JSON.stringify(e));
+}
+
+/* 剥离页面展示字段，只保留目标的业务字段后再写回全局数据 */
+function plainGoal(e) {
+    return {
+        id: e.id,
+        title: e.title,
+        term: e.term,
+        desc: e.desc || "",
+        progress: e.progress || 0,
+        status: e.status || "pending",
+        subtasks: cloneData(e.subtasks || [])
+    };
+}
+
+function plainGoals(e) {
+    return (e || []).map(plainGoal);
+}
+
 Page({
     data: {
         goals: [],
@@ -122,15 +144,15 @@ Page({
         });
     },
     quickAddGoal: function(t) {
-        var e = this, s = t.currentTarget.dataset, a = s.title, i = s.term;
-        this.openAddModal(), setTimeout(function() {
-            e.setData({
-                "formData.title": a,
-                termIndex: e.data.termOptions.findIndex(function(t) {
-                    return t.value === i;
-                })
-            });
-        }, 100);
+        var e = t.currentTarget.dataset, s = e.title, a = e.term, i = this.data.termOptions.findIndex(function(t) {
+            return t.value === a;
+        });
+        /* 直接用一次 setData 填好表单，避免 setTimeout 延迟覆盖用户输入 */
+        this.openAddModal(), this.setData({
+            "formData.title": s,
+            "formData.term": a,
+            termIndex: i >= 0 ? i : 0
+        });
     },
     openAddModal: function() {
         this.setData({
@@ -171,7 +193,7 @@ Page({
                     desc: s.desc || "",
                     progress: s.progress,
                     status: s.status,
-                    subtasks: s.subtasks || []
+                    subtasks: cloneData(s.subtasks || [])
                 },
                 termIndex: a >= 0 ? a : 0,
                 statusIndex: i >= 0 ? i : 0,
@@ -187,7 +209,7 @@ Page({
             content: "确定要删除这个目标吗？",
             success: function(t) {
                 if (t.confirm) {
-                    var i = e.data.goals.filter(function(t) {
+                    var i = plainGoals(e.data.goals).filter(function(t) {
                         return t.id !== a;
                     });
                     s.updateData("goals", i), e.loadGoals();
@@ -294,13 +316,18 @@ Page({
         });
     },
     onSubtaskInput: function(e) {
-        var s = e.currentTarget.dataset.index, a = t(this.data.formData.subtasks);
-        a[s].text = e.detail.value, this.setData({
-            "formData.subtasks": a
+        var s = e.currentTarget.dataset.index, a = e.detail.value, i = (this.data.formData.subtasks || []).map(function(t, e) {
+            return e === s ? {
+                text: a,
+                done: t.done
+            } : t;
+        });
+        this.setData({
+            "formData.subtasks": i
         });
     },
     toggleSubtask: function(e) {
-        var a = e.currentTarget.dataset, i = a.goalId, n = a.subIndex, o = t(this.data.goals), r = o.find(function(t) {
+        var a = e.currentTarget.dataset, i = a.goalId, n = a.subIndex, o = plainGoals(this.data.goals), r = o.find(function(t) {
             return t.id === i;
         });
         if (r && r.subtasks && r.subtasks[n]) {
@@ -308,40 +335,53 @@ Page({
             var u = r.subtasks.filter(function(t) {
                 return t.done;
             }).length;
-            r.progress = Math.round(u / r.subtasks.length * 100), 100 === r.progress ? r.status = "done" : r.progress > 0 && (r.status = "progress"), 
+            /* 进度为 0 时回到「待开始」，100 时标记「已完成」，其余为「进行中」 */
+            r.progress = Math.round(u / r.subtasks.length * 100), 100 === r.progress ? r.status = "done" : r.progress > 0 ? r.status = "progress" : r.status = "pending", 
             s.updateData("goals", o), this.loadGoals();
         }
     },
     saveGoal: function() {
         var a = this.data, i = a.formData, n = a.isEdit, o = a.editId;
-        if (i.title.trim()) {
-            var r = t(this.data.goals), u = e(e({}, i), {}, {
-                subtasks: i.subtasks.filter(function(t) {
-                    return t.text.trim();
-                })
-            });
-            if (n) {
-                var l = r.findIndex(function(t) {
-                    return t.id === o;
-                });
-                l >= 0 && (r[l].subtasks && u.subtasks.length === r[l].subtasks.length && (u.subtasks = u.subtasks.map(function(t, s) {
-                    var a;
-                    return e(e({}, t), {}, {
-                        done: (null === (a = r[l].subtasks[s]) || void 0 === a ? void 0 : a.done) || !1
-                    });
-                })), r[l] = e(e({}, u), {}, {
-                    id: o
-                }));
-            } else r.push(e(e({}, u), {}, {
-                id: Date.now().toString()
-            }));
-            s.updateData("goals", r), this.loadGoals(), this.closeModal(), wx.showToast({
-                title: "保存成功",
-                icon: "success"
-            });
-        } else wx.showToast({
+        if (!i.title.trim()) return void wx.showToast({
             title: "请输入目标名称",
             icon: "none"
+        });
+        var r = plainGoals(this.data.goals), u = plainGoal({
+            title: i.title.trim(),
+            term: i.term,
+            desc: i.desc,
+            progress: i.progress,
+            status: i.status,
+            subtasks: (i.subtasks || []).filter(function(t) {
+                return t.text.trim();
+            })
+        });
+        if (u.progress >= 100) u.status = "done";
+        else if (u.progress > 0 && "pending" === u.status) u.status = "progress";
+        if (n) {
+            var l = r.findIndex(function(t) {
+                return t.id === o;
+            });
+            if (l < 0) return void wx.showToast({
+                title: "目标不存在，请刷新后重试",
+                icon: "none"
+            });
+            r[l].subtasks && u.subtasks.length === r[l].subtasks.length && (u.subtasks = u.subtasks.map(function(t, e) {
+                return {
+                    text: t.text,
+                    done: !!(r[l].subtasks[e] && r[l].subtasks[e].done)
+                };
+            })), r[l] = e(e({}, u), {}, {
+                id: o
+            });
+        } else u.id = s.genId(), r.push(u);
+        if (!s.updateData("goals", r)) return void wx.showToast({
+            title: "保存失败，请重试",
+            icon: "none"
+        });
+        this.loadGoals(), this.closeModal(), wx.showToast({
+            title: "保存成功",
+            icon: "success"
         });
     }
 });

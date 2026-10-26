@@ -47,3 +47,9 @@ v1（4/29）与 v2（6/10）唯一差异在 `pages/goals/goals.wxml`：v2 在目
 - 工作目录：`D:\AI\Code\personal-growth-plan`（微信开发者工具「导入项目」打开，AppID 填 wx57607a802e684006）。
 - 备份：`D:\AI\Code\_backup\personal-growth-plan_2026-10-26.zip`；原始恢复证据在 `D:\AI\Code\personal-growth-plan_recovery\`。
 - 修改后先在模拟器验证，再上传（上传需你本人微信登录开发者工具）。
+
+## 后续修复（2026-10-26）
+
+恢复出源码后，针对用户反馈的「数据保存 / 读取异常（保存不上、丢失、重复）」做了数据层 E2E 复现并修复了 4 类缺陷（复盘列表原地反转、取消编辑污染共享数据、展示字段写进 storage、总览进行中目标统计口径），另修复进度/状态不一致、quickAddGoal 竞态、Date.now 撞 ID 等问题，并给数据层加了规范化与迁移清洗。详见 [FIXES.md](FIXES.md)。
+
+验证：wcc/wcsc 官方编译器通过；automator E2E 39/39 通过；测试数据已清空。

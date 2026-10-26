@@ -1,5 +1,20 @@
 var t = require("../../@babel/runtime/helpers/toConsumableArray"), e = require("../../@babel/runtime/helpers/objectSpread2"), a = getApp(), i = require("../../utils/aiDB");
 
+/* 只保留技能的业务字段，避免把 levelText 等展示字段写回全局数据 */
+function plainSkill(e) {
+    return {
+        id: e.id,
+        name: e.name,
+        category: e.category,
+        level: e.level || 0,
+        note: e.note || ""
+    };
+}
+
+function plainSkills(e) {
+    return (e || []).map(plainSkill);
+}
+
 Page({
     data: {
         skills: [],
@@ -95,13 +110,13 @@ Page({
             icon: "none"
         }); else {
             var l = {
-                id: Date.now().toString(),
+                id: a.genId(),
                 name: s,
                 category: o,
                 level: 30,
                 note: ""
-            }, n = [].concat(t(this.data.skills), [ l ]);
-            a.updateData("skills", n), this.loadSkills(), wx.showToast({
+            }, n = plainSkills(this.data.skills);
+            n.push(l), a.updateData("skills", n), this.loadSkills(), wx.showToast({
                 title: "已添加 ".concat(s),
                 icon: "success"
             });
@@ -132,7 +147,12 @@ Page({
                 showModal: !0,
                 isEdit: !0,
                 editId: a,
-                formData: e({}, i),
+                formData: {
+                    name: i.name,
+                    category: i.category,
+                    level: i.level,
+                    note: i.note || ""
+                },
                 categoryIndex: s >= 0 ? s : 0,
                 showNoteSuggestions: !1
             }), this.updateLevelHint(i.level);
@@ -145,7 +165,7 @@ Page({
             content: "确定要删除这个技能吗？",
             success: function(t) {
                 if (t.confirm) {
-                    var s = e.data.skills.filter(function(t) {
+                    var s = plainSkills(e.data.skills).filter(function(t) {
                         return t.id !== i;
                     });
                     a.updateData("skills", s), e.loadSkills();
@@ -204,28 +224,32 @@ Page({
     },
     saveSkill: function() {
         var i = this.data, s = i.formData, o = i.isEdit, l = i.editId;
-        if (s.name.trim()) if (s.category) {
-            var n = t(this.data.skills);
-            if (o) {
-                var r = n.findIndex(function(t) {
-                    return t.id === l;
-                });
-                r >= 0 && (n[r] = e(e({}, s), {}, {
-                    id: l
-                }));
-            } else n.push(e(e({}, s), {}, {
-                id: Date.now().toString()
-            }));
-            a.updateData("skills", n), this.loadSkills(), this.closeModal(), wx.showToast({
-                title: "保存成功",
-                icon: "success"
-            });
-        } else wx.showToast({
-            title: "请选择技能分类",
-            icon: "none"
-        }); else wx.showToast({
+        if (!s.name.trim()) return void wx.showToast({
             title: "请输入技能名称",
             icon: "none"
+        });
+        if (!s.category) return void wx.showToast({
+            title: "请选择技能分类",
+            icon: "none"
+        });
+        var n = plainSkills(this.data.skills), r = plainSkill(s);
+        if (o) {
+            var u = n.findIndex(function(t) {
+                return t.id === l;
+            });
+            if (u < 0) return void wx.showToast({
+                title: "技能不存在，请刷新后重试",
+                icon: "none"
+            });
+            r.id = l, n[u] = r;
+        } else r.id = a.genId(), n.push(r);
+        if (!a.updateData("skills", n)) return void wx.showToast({
+            title: "保存失败，请重试",
+            icon: "none"
+        });
+        this.loadSkills(), this.closeModal(), wx.showToast({
+            title: "保存成功",
+            icon: "success"
         });
     }
 });
