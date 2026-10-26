@@ -49,5 +49,6 @@
         "selectedIconPath": "images/direction-active.png"
       }
     ]
-  }
+  },
+  "style": "v2"
 }

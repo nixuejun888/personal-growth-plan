@@ -1,7 +1,24 @@
 {
   "description": "个人成长规划系统（从已发布代码包恢复）",
   "packOptions": {
-    "ignore": []
+    "ignore": [
+      {
+        "type": "file",
+        "value": "README.md"
+      },
+      {
+        "type": "folder",
+        "value": "docs"
+      },
+      {
+        "type": "file",
+        "value": ".gitignore"
+      },
+      {
+        "type": "folder",
+        "value": ".git"
+      }
+    ]
   },
   "setting": {
     "es6": true,
