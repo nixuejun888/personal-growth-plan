@@ -1,0 +1,109 @@
+<view class="container">
+    <view class="ai-hint">
+        <view class="ai-hint-badge">AI 引导</view>
+        <view class="ai-hint-title">复盘框架推荐</view>
+        <view class="ai-hint-body">推荐使用 KPT 复盘法：<view style="margin-top:12rpx;">
+                <view style="margin-bottom:8rpx;">
+                    <strong>Keep（保持）</strong>：哪些做得好，要继续保持？</view>
+                <view style="margin-bottom:8rpx;">
+                    <strong>Problem（问题）</strong>：遇到了什么问题和阻碍？</view>
+                <view>
+                    <strong>Try（尝试）</strong>：下次可以尝试什么改进？</view>
+            </view>
+            <view style="margin-top:16rpx;color:#64748b;">建议每周或每两周做一次复盘，保持节奏比追求完美更重要。</view>
+        </view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">📝</view>复盘记录</view>
+            <view bindtap="openAddModal" class="btn btn-primary btn-sm">+ 新建复盘</view>
+        </view>
+        <block wx:if="{{reviews.length>0}}">
+            <view class="review-card" wx:for="{{reviews}}" wx:key="id">
+                <view class="review-date">📅 {{item.date}} | 自评：{{item.score}}/10</view>
+                <view class="review-section" wx:if="{{item.achievement}}">
+                    <view class="review-section-title">🏆 本周成就</view>
+                    <view class="review-section-content">{{item.achievement}}</view>
+                </view>
+                <view class="review-section" wx:if="{{item.challenge}}">
+                    <view class="review-section-title">💪 遇到的挑战</view>
+                    <view class="review-section-content">{{item.challenge}}</view>
+                </view>
+                <view class="review-section" wx:if="{{item.learning}}">
+                    <view class="review-section-title">💡 学到了什么</view>
+                    <view class="review-section-content">{{item.learning}}</view>
+                </view>
+                <view class="review-section" wx:if="{{item.plan}}">
+                    <view class="review-section-title">📋 下周计划</view>
+                    <view class="review-section-content">{{item.plan}}</view>
+                </view>
+                <view style="text-align:right;margin-top:16rpx;">
+                    <view bindtap="deleteReview" class="btn btn-danger btn-sm" data-id="{{item.id}}">删除</view>
+                </view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">📝</view>
+            <view class="text">开始你的第一次复盘</view>
+            <view bindtap="openAddModal" class="btn btn-primary">新建复盘</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeModal" class="modal-mask" wx:if="{{showModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">新建复盘</view>
+            <view bindtap="closeModal" class="modal-close">✕</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">复盘日期</view>
+            <picker bindchange="onDateChange" class="form-picker" mode="date" value="{{formData.date}}">
+                <view>{{formData.date||'请选择日期'}}</view>
+            </picker>
+        </view>
+        <view class="form-group">
+            <view class="form-label">本周成就<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="achievement" style="margin-left:12rpx;">AI 提问</view>
+            </view>
+            <textarea bindinput="onAchievementInput" class="form-textarea" placeholder="完成了哪些重要的事情？" value="{{formData.achievement}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.achievement}}">
+                <view class="ai-hint-body">{{hints.achievement}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">遇到的挑战<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="challenge" style="margin-left:12rpx;">AI 提问</view>
+            </view>
+            <textarea bindinput="onChallengeInput" class="form-textarea" placeholder="遇到了什么困难？如何克服的？" value="{{formData.challenge}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.challenge}}">
+                <view class="ai-hint-body">{{hints.challenge}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">学到了什么<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="learning" style="margin-left:12rpx;">AI 提问</view>
+            </view>
+            <textarea bindinput="onLearningInput" class="form-textarea" placeholder="有哪些新的认知和收获？" value="{{formData.learning}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.learning}}">
+                <view class="ai-hint-body">{{hints.learning}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">下周计划<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="plan" style="margin-left:12rpx;">AI 提问</view>
+            </view>
+            <textarea bindinput="onPlanInput" class="form-textarea" placeholder="接下来要做什么？" value="{{formData.plan}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.plan}}">
+                <view class="ai-hint-body">{{hints.plan}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">自我评分: {{formData.score}}/10</view>
+            <view class="slider-container">
+                <slider activeColor="#06b6d4" backgroundColor="#2d3748" bindchange="onScoreChange" blockColor="#06b6d4" blockSize="20" class="slider" max="10" min="1" value="{{formData.score}}"></slider>
+                <view class="slider-value">{{formData.score}}/10</view>
+            </view>
+        </view>
+        <view class="modal-footer">
+            <view bindtap="closeModal" class="btn btn-secondary">取消</view>
+            <view bindtap="saveReview" class="btn btn-primary">保存复盘</view>
+        </view>
+    </view>
+</view>

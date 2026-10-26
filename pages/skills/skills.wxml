@@ -1,0 +1,92 @@
+<view class="container">
+    <view class="ai-hint">
+        <view class="ai-hint-badge">AI 引导</view>
+        <view class="ai-hint-title">如何盘点技能？</view>
+        <view class="ai-hint-body">从以下维度思考你掌握的技能，点击标签快速添加：<view class="chip-group">
+                <view bindtap="quickAddSkill" class="chip" data-category="{{item.category}}" data-name="{{item.name}}" wx:for="{{skillChips}}" wx:key="name">{{item.name}}</view>
+            </view>
+        </view>
+    </view>
+    <view class="filter-group">
+        <view bindtap="setFilter" class="filter-btn {{filter===''?'active':''}}" data-filter="">全部</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='技术'?'active':''}}" data-filter="技术">技术</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='软技能'?'active':''}}" data-filter="软技能">软技能</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='语言'?'active':''}}" data-filter="语言">语言</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='管理'?'active':''}}" data-filter="管理">管理</view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">🎯</view>我的技能</view>
+            <view bindtap="openAddModal" class="btn btn-primary btn-sm">+ 添加技能</view>
+        </view>
+        <block wx:if="{{filteredSkills.length>0}}">
+            <view class="skill-item" wx:for="{{filteredSkills}}" wx:key="id">
+                <view class="skill-header">
+                    <view>
+                        <view class="tag tag-category" style="margin-right:12rpx;">{{item.category}}</view>
+                        <text class="skill-name">{{item.name}}</text>
+                        <text class="skill-level-text" style="margin-left:12rpx;">{{item.levelText}}</text>
+                    </view>
+                    <view class="action-group">
+                        <view bindtap="editSkill" class="btn btn-secondary btn-sm" data-id="{{item.id}}">编辑</view>
+                        <view bindtap="deleteSkill" class="btn btn-danger btn-sm" data-id="{{item.id}}">删除</view>
+                    </view>
+                </view>
+                <view class="progress-bar">
+                    <view class="progress-fill" style="width:{{item.level}}%"></view>
+                </view>
+                <view style="margin-top:16rpx;color:#64748b;font-size:24rpx;" wx:if="{{item.note}}">{{item.note}}</view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">🎯</view>
+            <view class="text">{{filter?'该分类下没有技能':'点击上方标签快速添加，或手动创建'}}</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeModal" class="modal-mask" wx:if="{{showModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">{{isEdit?'编辑技能':'添加技能'}}</view>
+            <view bindtap="closeModal" class="modal-close">✕</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">技能名称</view>
+            <input bindinput="onNameInput" class="form-input" placeholder="例如：JavaScript" value="{{formData.name}}"></input>
+        </view>
+        <view class="form-group">
+            <view class="form-label">技能分类</view>
+            <picker bindchange="onCategoryChange" class="form-picker" mode="selector" range="{{categories}}" value="{{categoryIndex}}">
+                <view>{{categories[categoryIndex]||'请选择分类'}}</view>
+            </picker>
+        </view>
+        <view class="form-group">
+            <view class="form-label">熟练程度: {{formData.level}}%</view>
+            <view class="slider-container">
+                <slider activeColor="#06b6d4" backgroundColor="#2d3748" bindchange="onLevelChange" blockColor="#06b6d4" blockSize="20" class="slider" max="100" min="0" value="{{formData.level}}"></slider>
+                <view class="slider-value">{{formData.level}}%</view>
+            </view>
+            <view class="ai-hint" style="margin-top:12rpx;">
+                <view class="ai-hint-body">{{levelHint}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">备注（可选）<view bindtap="showNoteHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 建议</view>
+            </view>
+            <textarea bindinput="onNoteInput" class="form-textarea" placeholder="学习经历、证书等" value="{{formData.note}}"></textarea>
+        </view>
+        <view class="ai-hint" wx:if="{{showNoteSuggestions}}">
+            <view class="ai-hint-badge">AI 建议</view>
+            <view class="ai-hint-body">
+                <view class="chip-group">
+                    <view bindtap="fillNote" class="chip" data-text="{{item}}" wx:for="{{noteSuggestions}}" wx:key="index">{{item}}</view>
+                </view>
+            </view>
+        </view>
+        <view class="modal-footer">
+            <view bindtap="closeModal" class="btn btn-secondary">取消</view>
+            <view bindtap="saveSkill" class="btn btn-primary">保存</view>
+        </view>
+    </view>
+</view>

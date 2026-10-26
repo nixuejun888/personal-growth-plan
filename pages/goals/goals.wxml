@@ -1,0 +1,120 @@
+<view class="container">
+    <view class="ai-hint">
+        <view class="ai-hint-badge">AI 引导</view>
+        <view class="ai-hint-title">如何设定好目标？</view>
+        <view class="ai-hint-body">好的目标遵循 SMART 原则：具体、可衡量、可实现、相关性、有时限。<view class="chip-group">
+                <view bindtap="quickAddGoal" class="chip" data-term="{{item.term}}" data-title="{{item.title}}" wx:for="{{goalChips}}" wx:key="title">{{item.text}}</view>
+            </view>
+        </view>
+    </view>
+    <view class="filter-group">
+        <view bindtap="setFilter" class="filter-btn {{filter===''?'active':''}}" data-filter="">全部</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='short'?'active':''}}" data-filter="short">短期</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='mid'?'active':''}}" data-filter="mid">中期</view>
+        <view bindtap="setFilter" class="filter-btn {{filter==='long'?'active':''}}" data-filter="long">长期</view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">🎯</view>我的目标</view>
+            <view bindtap="openAddModal" class="btn btn-primary btn-sm">+ 添加目标</view>
+        </view>
+        <block wx:if="{{filteredGoals.length>0}}">
+            <view class="goal-item {{goal.term}}" wx:for="{{filteredGoals}}" wx:for-item="goal" wx:key="id">
+                <view class="goal-meta">
+                    <view class="tag tag-term-{{goal.term}}">{{goal.termText}}</view>
+                    <view class="tag tag-status-{{goal.status}}">{{goal.statusText}}</view>
+                </view>
+                <view class="goal-title">{{goal.title}}</view>
+                <view class="goal-desc" wx:if="{{goal.desc}}">{{goal.desc}}</view>
+                <view style="margin-bottom:16rpx;" wx:if="{{goal.subtasks&&goal.subtasks.length>0}}">
+                    <view class="subtask-item" wx:for="{{goal.subtasks}}" wx:for-index="subIndex" wx:for-item="subtask" wx:key="index">
+                        <view bindtap="toggleSubtask" class="checkbox {{subtask.done?'checked':''}}" data-goal-id="{{goal.id}}" data-sub-index="{{subIndex}}"></view>
+                        <view class="subtask-text {{subtask.done?'done':''}}">{{subtask.text}}</view>
+                    </view>
+                </view>
+                <view class="progress-bar">
+                    <view class="progress-fill" style="width:{{goal.progress}}%"></view>
+                </view>
+                <view style="display:flex;justify-content:space-between;align-items:center;margin-top:16rpx;">
+                    <text style="color:#64748b;font-size:24rpx;">进度 {{goal.progress}}%</text>
+                    <view class="action-group">
+                        <view bindtap="editGoal" class="btn btn-secondary btn-sm" data-id="{{goal.id}}">编辑</view>
+                        <view bindtap="deleteGoal" class="btn btn-danger btn-sm" data-id="{{goal.id}}">删除</view>
+                    </view>
+                </view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">🎯</view>
+            <view class="text">{{filter?'该类型下没有目标':'点击上方标签快速添加，或手动创建'}}</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeModal" class="modal-mask" wx:if="{{showModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">{{isEdit?'编辑目标':'添加目标'}}</view>
+            <view bindtap="closeModal" class="modal-close">✕</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">目标名称<view bindtap="showTitleHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 润色</view>
+            </view>
+            <input bindinput="onTitleInput" class="form-input" placeholder="例如：掌握React框架" value="{{formData.title}}"></input>
+        </view>
+        <view class="ai-hint" wx:if="{{showTitleSuggestions}}">
+            <view class="ai-hint-badge">AI 润色建议</view>
+            <view class="ai-hint-body">
+                <view class="chip-group">
+                    <view bindtap="fillTitle" class="chip" data-text="{{item}}" wx:for="{{titleSuggestions}}" wx:key="index">{{item}}</view>
+                </view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">目标周期</view>
+            <picker bindchange="onTermChange" class="form-picker" mode="selector" range="{{termOptions}}" rangeKey="text" value="{{termIndex}}">
+                <view>{{termOptions[termIndex].text}}</view>
+            </picker>
+        </view>
+        <view class="form-group">
+            <view class="form-label">目标描述<view bindtap="showDescHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 引导</view>
+            </view>
+            <textarea bindinput="onDescInput" class="form-textarea" placeholder="描述你的目标和期望成果" value="{{formData.desc}}"></textarea>
+        </view>
+        <view class="ai-hint" wx:if="{{showDescFramework}}">
+            <view class="ai-hint-badge">AI 引导</view>
+            <view class="ai-hint-body">
+                <view>{{descFramework}}</view>
+                <view bindtap="fillDescTemplate" class="btn btn-secondary btn-sm" style="margin-top:16rpx;">填入模板</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">完成进度: {{formData.progress}}%</view>
+            <view class="slider-container">
+                <slider activeColor="#06b6d4" backgroundColor="#2d3748" bindchange="onProgressChange" blockColor="#06b6d4" blockSize="20" class="slider" max="100" min="0" value="{{formData.progress}}"></slider>
+                <view class="slider-value">{{formData.progress}}%</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">拆解为子任务<view bindtap="generateSubtasks" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 拆解</view>
+            </view>
+            <view wx:if="{{formData.subtasks.length>0}}">
+                <view class="subtask-item" wx:for="{{formData.subtasks}}" wx:key="index">
+                    <input bindinput="onSubtaskInput" class="form-input" data-index="{{index}}" style="flex:1;padding:12rpx 16rpx;" value="{{item.text}}"></input>
+                    <view bindtap="removeSubtask" class="btn btn-danger btn-sm" data-index="{{index}}">✕</view>
+                </view>
+            </view>
+            <view bindtap="addSubtask" class="btn btn-secondary btn-sm" style="margin-top:12rpx;">+ 添加子任务</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">目标状态</view>
+            <picker bindchange="onStatusChange" class="form-picker" mode="selector" range="{{statusOptions}}" rangeKey="text" value="{{statusIndex}}">
+                <view>{{statusOptions[statusIndex].text}}</view>
+            </picker>
+        </view>
+        <view class="modal-footer">
+            <view bindtap="closeModal" class="btn btn-secondary">取消</view>
+            <view bindtap="saveGoal" class="btn btn-primary">保存</view>
+        </view>
+    </view>
+</view>

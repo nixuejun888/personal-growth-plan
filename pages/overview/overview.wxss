@@ -1,0 +1,7 @@
+.ai-hint {
+    cursor: pointer;
+}
+
+.ai-hint:active {
+    opacity: .8;
+}

@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/overview/overview",
+    "pages/skills/skills",
+    "pages/goals/goals",
+    "pages/review/review",
+    "pages/direction/direction"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#0a0f1a",
+    "navigationBarTitleText": "个人成长规划系统",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#64748b",
+    "selectedColor": "#06b6d4",
+    "backgroundColor": "#111827",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/overview/overview",
+        "text": "总览",
+        "iconPath": "images/overview.png",
+        "selectedIconPath": "images/overview-active.png"
+      },
+      {
+        "pagePath": "pages/skills/skills",
+        "text": "技能",
+        "iconPath": "images/skills.png",
+        "selectedIconPath": "images/skills-active.png"
+      },
+      {
+        "pagePath": "pages/goals/goals",
+        "text": "目标",
+        "iconPath": "images/goals.png",
+        "selectedIconPath": "images/goals-active.png"
+      },
+      {
+        "pagePath": "pages/review/review",
+        "text": "复盘",
+        "iconPath": "images/review.png",
+        "selectedIconPath": "images/review-active.png"
+      },
+      {
+        "pagePath": "pages/direction/direction",
+        "text": "方向",
+        "iconPath": "images/direction.png",
+        "selectedIconPath": "images/direction-active.png"
+      }
+    ]
+  }
+}

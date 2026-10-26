@@ -1,0 +1,7 @@
+.chip:active {
+    opacity: .7;
+}
+
+.filter-btn:active {
+    opacity: .8;
+}

@@ -1,0 +1,172 @@
+<view class="container">
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">🚀</view>发展路径</view>
+            <view bindtap="openPathModal" class="btn btn-secondary btn-sm">编辑路径</view>
+        </view>
+        <view class="ai-hint" style="margin-bottom:16rpx;">
+            <view class="ai-hint-badge">AI 引导</view>
+            <view class="ai-hint-title">常见发展路径参考</view>
+            <view class="ai-hint-body">点击下方路径模板快速填充：<view class="chip-group">
+                    <view bindtap="loadPathTemplate" class="chip" data-type="tech">技术路线</view>
+                    <view bindtap="loadPathTemplate" class="chip" data-type="manage">管理路线</view>
+                    <view bindtap="loadPathTemplate" class="chip" data-type="product">产品路线</view>
+                    <view bindtap="loadPathTemplate" class="chip" data-type="free">自由职业</view>
+                </view>
+            </view>
+        </view>
+        <block wx:if="{{path.length>0}}">
+            <view wx:for="{{path}}" wx:key="index">
+                <view class="path-node {{item.current?'current':''}}">
+                    <view class="path-title">{{item.title}}</view>
+                    <view class="path-desc">{{item.desc}}</view>
+                </view>
+                <view class="path-connector" wx:if="{{index<path.length-1}}"></view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">🚀</view>
+            <view class="text">选择路径模板或自行规划</view>
+        </view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">📋</view>行动计划</view>
+            <view bindtap="openActionModal" class="btn btn-primary btn-sm">添加行动</view>
+        </view>
+        <block wx:if="{{actions.length>0}}">
+            <view class="skill-item" wx:for="{{actions}}" wx:key="id">
+                <view class="skill-header">
+                    <view style="display:flex;align-items:center;gap:12rpx;">
+                        <view bindtap="toggleAction" class="checkbox {{item.done?'checked':''}}" data-id="{{item.id}}"></view>
+                        <view class="{{item.done?'subtask-text done':''}}">{{item.title}}</view>
+                    </view>
+                    <view bindtap="deleteAction" class="btn btn-danger btn-sm" data-id="{{item.id}}">删除</view>
+                </view>
+                <view style="color:#64748b;font-size:24rpx;margin-top:12rpx;" wx:if="{{item.deadline}}">截止：{{item.deadline}}</view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">📋</view>
+            <view class="text">制定具体的行动计划</view>
+            <view bindtap="openActionModal" class="btn btn-primary">添加行动</view>
+        </view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">💭</view>愿景描述</view>
+            <view bindtap="openVisionModal" class="btn btn-secondary btn-sm">编辑</view>
+        </view>
+        <block wx:if="{{vision.year1||vision.year3||vision.values}}">
+            <view class="review-section" wx:if="{{vision.year1}}">
+                <view class="review-section-title">🎯 1年后愿景</view>
+                <view class="review-section-content">{{vision.year1}}</view>
+            </view>
+            <view class="review-section" wx:if="{{vision.year3}}">
+                <view class="review-section-title">🚀 3年职业目标</view>
+                <view class="review-section-content">{{vision.year3}}</view>
+            </view>
+            <view class="review-section" wx:if="{{vision.values}}">
+                <view class="review-section-title">💎 核心价值观</view>
+                <view class="review-section-content">{{vision.values}}</view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">💭</view>
+            <view class="text">让 AI 帮你启发思路，或自行撰写</view>
+            <view bindtap="openVisionModal" class="btn btn-primary">撰写愿景</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closePathModal" class="modal-mask" wx:if="{{showPathModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">编辑发展路径</view>
+            <view bindtap="closePathModal" class="modal-close">✕</view>
+        </view>
+        <view style="background:#111827;padding:24rpx;border-radius:20rpx;margin-bottom:16rpx;" wx:for="{{pathNodes}}" wx:key="index">
+            <view style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16rpx;">
+                <text style="font-weight:500;">阶段 {{index+1}}</text>
+                <view style="display:flex;align-items:center;gap:12rpx;">
+                    <view bindtap="togglePathCurrent" class="checkbox {{item.current?'checked':''}}" data-index="{{index}}"></view>
+                    <text style="font-size:24rpx;color:#94a3b8;">当前位置</text>
+                </view>
+            </view>
+            <input bindinput="onPathTitleInput" class="form-input" data-index="{{index}}" placeholder="阶段名称" style="margin-bottom:12rpx;" value="{{item.title}}"></input>
+            <textarea bindinput="onPathDescInput" class="form-textarea" data-index="{{index}}" placeholder="阶段描述" style="min-height:100rpx;" value="{{item.desc}}"></textarea>
+            <view bindtap="removePathNode" class="btn btn-danger btn-sm" data-index="{{index}}" style="margin-top:12rpx;">删除阶段</view>
+        </view>
+        <view bindtap="addPathNode" class="btn btn-secondary" style="margin-top:12rpx;">+ 添加阶段</view>
+        <view class="modal-footer">
+            <view bindtap="closePathModal" class="btn btn-secondary">取消</view>
+            <view bindtap="savePath" class="btn btn-primary">保存</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeActionModal" class="modal-mask" wx:if="{{showActionModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">添加行动计划</view>
+            <view bindtap="closeActionModal" class="modal-close">✕</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">行动项</view>
+            <input bindinput="onActionTitleInput" class="form-input" placeholder="例如：每天学习1小时" value="{{actionForm.title}}"></input>
+        </view>
+        <view class="form-group">
+            <view class="form-label">截止日期</view>
+            <picker bindchange="onActionDeadlineChange" class="form-picker" mode="date" value="{{actionForm.deadline}}">
+                <view>{{actionForm.deadline||'请选择日期'}}</view>
+            </picker>
+        </view>
+        <view class="form-group">
+            <view class="form-label">关联目标（可选）</view>
+            <picker bindchange="onGoalChange" class="form-picker" mode="selector" range="{{goalOptions}}" rangeKey="title" value="{{goalIndex}}">
+                <view>{{goalOptions[goalIndex].title}}</view>
+            </picker>
+        </view>
+        <view class="modal-footer">
+            <view bindtap="closeActionModal" class="btn btn-secondary">取消</view>
+            <view bindtap="saveAction" class="btn btn-primary">添加</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeVisionModal" class="modal-mask" wx:if="{{showVisionModal}}">
+    <view catchtap="stopPropagation" class="modal-content">
+        <view class="modal-header">
+            <view class="modal-title">撰写发展愿景</view>
+            <view bindtap="closeVisionModal" class="modal-close">✕</view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">1年后你希望成为什么样的人？<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-field="year1" style="margin-left:12rpx;">AI 启发</view>
+            </view>
+            <textarea bindinput="onVisionYear1Input" class="form-textarea" placeholder="描述你1年后的状态..." value="{{visionForm.year1}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints.year1}}">
+                <view class="ai-hint-body">{{visionHints.year1}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">3年后的职业目标<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-field="year3" style="margin-left:12rpx;">AI 启发</view>
+            </view>
+            <textarea bindinput="onVisionYear3Input" class="form-textarea" placeholder="描述你3年后的职业目标..." value="{{visionForm.year3}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints.year3}}">
+                <view class="ai-hint-body">{{visionHints.year3}}</view>
+            </view>
+        </view>
+        <view class="form-group">
+            <view class="form-label">核心价值观<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-field="values" style="margin-left:12rpx;">AI 启发</view>
+            </view>
+            <textarea bindinput="onVisionValuesInput" class="form-textarea" placeholder="什么对你来说最重要？" value="{{visionForm.values}}"></textarea>
+            <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionHints.values}}">
+                <view class="ai-hint-body">{{visionHints.values}}</view>
+            </view>
+        </view>
+        <view class="modal-footer">
+            <view bindtap="closeVisionModal" class="btn btn-secondary">取消</view>
+            <view bindtap="saveVision" class="btn btn-primary">保存</view>
+        </view>
+    </view>
+</view>

@@ -1,0 +1,109 @@
+<view class="container">
+    <view class="stats-grid">
+        <view class="stat-card">
+            <view class="stat-value">{{stats.totalSkills}}</view>
+            <view class="stat-label">技能总数</view>
+        </view>
+        <view class="stat-card">
+            <view class="stat-value">{{stats.activeGoals}}</view>
+            <view class="stat-label">进行中目标</view>
+        </view>
+        <view class="stat-card">
+            <view class="stat-value">{{stats.completedGoals}}</view>
+            <view class="stat-label">已完成目标</view>
+        </view>
+        <view class="stat-card">
+            <view class="stat-value">{{stats.reviewCount}}</view>
+            <view class="stat-label">复盘次数</view>
+        </view>
+    </view>
+    <view bindtap="openAiPanel" class="ai-hint">
+        <view class="ai-hint-badge">AI 成长顾问</view>
+        <view class="ai-hint-title">不确定从哪开始？</view>
+        <view class="ai-hint-body">让 AI 引导你完成技能盘点、目标拆解和方向规划</view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">🎯</view>近期目标</view>
+            <view bindtap="goToGoals" class="btn btn-primary btn-sm">添加目标</view>
+        </view>
+        <block wx:if="{{recentGoals.length>0}}">
+            <view class="goal-item {{goal.term}}" wx:for="{{recentGoals}}" wx:key="id">
+                <view class="goal-meta">
+                    <view class="tag tag-term-{{goal.term}}">{{goal.termText}}</view>
+                    <view class="tag tag-status-{{goal.status}}">{{goal.statusText}}</view>
+                </view>
+                <view class="goal-title">{{goal.title}}</view>
+                <view class="progress-bar">
+                    <view class="progress-fill" style="width:{{goal.progress}}%"></view>
+                </view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">🎯</view>
+            <view class="text">还没有设定目标</view>
+            <view bindtap="goToGoals" class="btn btn-primary">添加目标</view>
+        </view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">📈</view>技能概览</view>
+            <view bindtap="goToSkills" class="btn btn-primary btn-sm">盘点技能</view>
+        </view>
+        <block wx:if="{{topSkills.length>0}}">
+            <view class="skill-item" wx:for="{{topSkills}}" wx:key="id">
+                <view class="skill-header">
+                    <view class="skill-name">{{item.name}}</view>
+                    <view class="skill-level-text">{{item.level}}%</view>
+                </view>
+                <view class="progress-bar">
+                    <view class="progress-fill" style="width:{{item.level}}%"></view>
+                </view>
+            </view>
+        </block>
+        <view class="empty-state" wx:else>
+            <view class="icon">🎯</view>
+            <view class="text">还没有添加技能</view>
+            <view bindtap="goToSkills" class="btn btn-primary">盘点技能</view>
+        </view>
+    </view>
+    <view class="card">
+        <view class="card-header">
+            <view class="card-title">
+                <view class="icon">💡</view>成长洞察</view>
+            <view bindtap="generateInsight" class="btn btn-ai btn-sm">AI 分析</view>
+        </view>
+        <view class="insight-card" wx:for="{{insights}}" wx:key="index">
+            <view class="insight-title">{{item.title}}</view>
+            <view class="insight-content">{{item.content}}</view>
+        </view>
+    </view>
+</view>
+<view bindtap="closeAiPanel" class="ai-panel-mask {{aiPanelOpen?'open':''}}"></view>
+<view class="ai-panel {{aiPanelOpen?'open':''}}">
+    <view class="ai-panel-header">
+        <view class="ai-panel-title">
+            <text>✦</text>AI 成长顾问</view>
+        <view bindtap="closeAiPanel" class="modal-close">✕</view>
+    </view>
+    <view class="ai-panel-body">
+        <view bindtap="goToSkills" class="ai-question-card">
+            <view class="ai-question-title">🎯 技能盘点</view>
+            <view class="ai-question-desc">梳理你现有的技能，发现优势和短板</view>
+        </view>
+        <view bindtap="goToGoals" class="ai-question-card">
+            <view class="ai-question-title">🎯 目标设定</view>
+            <view class="ai-question-desc">用 SMART 原则设定清晰可执行的目标</view>
+        </view>
+        <view bindtap="goToReview" class="ai-question-card">
+            <view class="ai-question-title">📝 定期复盘</view>
+            <view class="ai-question-desc">用 KPT 框架进行有效的复盘总结</view>
+        </view>
+        <view bindtap="goToDirection" class="ai-question-card">
+            <view class="ai-question-title">🚀 发展方向</view>
+            <view class="ai-question-desc">规划你的职业发展路径</view>
+        </view>
+    </view>
+</view>
