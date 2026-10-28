@@ -117,7 +117,7 @@ Page({
             id: n.genId()
         }, o = n.getData(), s = [].concat(e(o.reviews || []), [ i ]);
         if (!n.updateData("reviews", s)) return void wx.showToast({
-            title: "保存失败，请重试",
+            title: n.saveErrorText ? n.saveErrorText() : "保存失败，请重试",
             icon: "none"
         });
         this._dirty = !1, this.loadReviews(), this.closeModal(), wx.showToast({

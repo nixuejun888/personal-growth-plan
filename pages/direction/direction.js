@@ -124,11 +124,12 @@ Page({
     },
     savePath: function() {
         var t = this.data.pathNodes.filter(function(t) {
-            return t.title.trim() || t.desc.trim();
+            return String(t.title || "").trim() || String(t.desc || "").trim();
         });
         if (!e.updateData("path", t)) return void wx.showToast({
-            title: "保存失败，请重试",
-            icon: "none"
+            title: e.saveErrorText ? e.saveErrorText() : "保存失败，请重试",
+            icon: "none",
+            duration: 3000
         });
         this._dirty = !1, this.loadData(), this.closePathModal(), wx.showToast({
             title: "保存成功",
@@ -141,8 +142,9 @@ Page({
         var n = this, s = function() {
             var t = JSON.parse(JSON.stringify(i));
             if (!e.updateData("path", t)) return void wx.showToast({
-                title: "保存失败，请重试",
-                icon: "none"
+                title: e.saveErrorText ? e.saveErrorText() : "保存失败，请重试",
+                icon: "none",
+                duration: 3000
             });
             n.loadData(), wx.showToast({
                 title: "已加载路径模板",
@@ -396,8 +398,9 @@ Page({
             years: a
         };
         if (!e.updateData("vision", c)) return void wx.showToast({
-            title: "保存失败，请重试",
-            icon: "none"
+            title: e.saveErrorText ? e.saveErrorText() : "保存失败，请重试",
+            icon: "none",
+            duration: 3000
         });
         this._dirty = !1, this.loadData(), this.closeVisionModal(), wx.showToast({
             title: "保存成功",

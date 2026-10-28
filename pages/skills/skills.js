@@ -272,7 +272,7 @@ Page({
             r.id = l, n[u] = r;
         } else r.id = a.genId(), n.push(r);
         if (!a.updateData("skills", n)) return void wx.showToast({
-            title: "保存失败，请重试",
+            title: a.saveErrorText ? a.saveErrorText() : "保存失败，请重试",
             icon: "none"
         });
         this._dirty = !1, this.loadSkills(), this.closeModal(), wx.showToast({

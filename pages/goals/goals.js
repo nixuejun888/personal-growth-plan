@@ -396,7 +396,7 @@ Page({
         a[i].subtasks = e;
         var n = computeProgress(e);
         if (n && (a[i].progress = n.progress, a[i].status = n.status), !s.updateData("goals", a)) return void wx.showToast({
-            title: "保存失败，请重试",
+            title: s.saveErrorText ? s.saveErrorText() : "保存失败，请重试",
             icon: "none"
         });
         this._dirty = !1, this.loadGoals(), this.closeStepsModal(), wx.showToast({
@@ -561,8 +561,9 @@ Page({
             });
         } else u.id = s.genId(), r.push(u);
         if (!s.updateData("goals", r)) return void wx.showToast({
-            title: "保存失败，请重试",
-            icon: "none"
+            title: s.saveErrorText ? s.saveErrorText() : "保存失败，请重试",
+            icon: "none",
+            duration: 3000
         });
         this._dirty = !1, this.loadGoals(), this.closeModal(), wx.showToast({
             title: "保存成功",

@@ -3,7 +3,7 @@ var app = getApp();
 
 Page({
   data: {
-    version: '1.3.0',
+    version: '1.3.1',
     schemaVersion: store.SCHEMA_VERSION,
     storageKey: store.STORAGE_KEY,
     stats: { goals: 0, skills: 0, reviews: 0, path: 0, actions: 0 },
@@ -127,7 +127,7 @@ Page({
     var backup = store.saveBackup(app.getData(), '导入前自动备份');
     var saved = app.replaceData(result.data);
     if (!saved) {
-      wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+      wx.showToast({ title: app.saveErrorText ? app.saveErrorText() : '保存失败，请重试', icon: 'none' });
       return;
     }
     this._pendingImport = null;
