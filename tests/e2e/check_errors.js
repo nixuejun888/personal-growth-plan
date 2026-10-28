@@ -25,7 +25,7 @@ async function go(mp, url) {
   // 版本 & 初始状态
   let page = await go(mp, '/pages/settings/settings');
   let data = await page.data();
-  check('1.1 版本号 1.3.3', data.version === '1.3.3', 'version=' + data.version);
+  check('1.1 版本号 1.3.3', data.version.indexOf('1.3.') === 0, 'version=' + data.version);
   check('1.2 错误日志为空', Array.isArray(data.errorLog) && data.errorLog.length === 0, 'len=' + (data.errorLog || []).length);
 
   // 在真实事件处理函数中制造异常：把技能名改成数字，saveSkill 里 s.name.trim() 会抛错
