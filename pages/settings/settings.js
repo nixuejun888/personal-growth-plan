@@ -18,7 +18,7 @@ function formatTime(timestamp) {
 
 Page(safePage.wrapPage({
   data: {
-    version: '1.3.3',
+    version: '1.3.4',
     schemaVersion: store.SCHEMA_VERSION,
     storageKey: store.STORAGE_KEY,
     stats: { goals: 0, skills: 0, reviews: 0, path: 0, actions: 0 },

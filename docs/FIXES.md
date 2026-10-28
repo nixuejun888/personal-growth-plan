@@ -174,3 +174,18 @@ $cli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
 
 ### 给用户的排查指引
 若真机仍无法保存：打开「设置 → 错误日志」，复制内容发给我（或截图）；同时可在「设置 → 保存诊断」复制最近一次保存失败原因。日志会带页面/方法名与异常消息，可直接定位。
+## 12. v1.3.4 真机 Babel helper 异常修复（2026-10-28）
+
+用户在手机体验版（1.3.3）的「设置 → 错误日志」中提供 8 条真机错误，全部为：
+
+```
+原因：_typeof3 is not a function
+堆栈：TypeError: _typeof3 is not a function
+  at _typeof (app-service.js:1746:80)
+  at isObject / buildInsights / _defineProperty ...
+```
+
+1. **性质**：这是开发者工具「增强编译（enhance）+ ES6 转 ES5（es6）」在真机构建时注入 Babel helper（`typeof` 被转换为 `_typeof`，内部再调用注入的 `_typeof3`）造成的运行时缺失——**不是我们业务代码本身的问题**；同一套代码在模拟器（不注入真机 helper）下完全正常，所以此前 113+ 项 E2E 全绿。
+2. **修复**：`project.config.json` 关闭 `es6` 与 `enhance` 两项编译选项，改为按源码原样上传（源码本身是 ES5 + 项目内自带的 `@babel/runtime/helpers`，不依赖工具注入）。同时保留 `minified:false`，便于真机堆栈直接对应源码。
+3. **验证**：重新编译后 129 项自动化测试全部通过（113 回归 + 8 真实点击保存 + 8 异常捕获）；上传包体仍远小于 2MB。
+4. **发布**：1.3.4 上传为开发版/体验版，供用户真机复测；仍未提交审核。
