@@ -3,6 +3,7 @@
  * 数据全部来自 app.globalData 的只读快照，不直接改写数据。
  * 成长洞察：由 utils/insight.js 的规则引擎基于当前数据生成，点击可跳转对应页面。
  */
+var safePage = require("../../utils/safePage");
 var app = getApp();
 var aiDB = require('../../utils/aiDB');
 var insight = require('../../utils/insight');
@@ -11,7 +12,7 @@ var TERM_TEXT = { short: '短期', mid: '中期', long: '长期' };
 var STATUS_TEXT = { pending: '待开始', progress: '进行中', done: '已完成' };
 var MAX_INSIGHTS = 6;
 
-Page({
+Page(safePage.wrapPage({
   data: {
     stats: { totalSkills: 0, activeGoals: 0, completedGoals: 0, reviewCount: 0 },
     recentGoals: [],
@@ -112,6 +113,12 @@ Page({
     wx.switchTab({ url: '/pages/goals/goals' });
   },
 
+  /** 总览页的「添加目标」：跳到目标页并自动打开新建弹窗，少点一步。 */
+  addGoal: function () {
+    getApp()._pendingGoalAdd = true;
+    wx.switchTab({ url: '/pages/goals/goals' });
+  },
+
   goToReview: function () {
     wx.switchTab({ url: '/pages/review/review' });
   },
@@ -119,4 +126,4 @@ Page({
   goToDirection: function () {
     wx.switchTab({ url: '/pages/direction/direction' });
   }
-});
+}));

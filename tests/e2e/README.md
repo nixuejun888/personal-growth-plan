@@ -28,8 +28,10 @@ $cli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
 | `baseline5b.js` | v1.2 页面交互：删除撤销、未保存提醒、导入后跳转、冷启动 | 23 PASS |
 | `edge.js` | 边界：复盘未保存提醒、重复技能、筛选下撤销、进度 100→done、非法导入 | 12 PASS |
 | `baseline6.js` | v1.3 新功能：步骤拆解全流程、分年愿景校验、洞察生成/去重/跳转 | 24 PASS |
+| `tap_save.js` | 真实点击（element.tap）验证技能/目标保存按钮、总览「添加目标」直达弹窗 | 8 PASS |
+| `check_errors.js` | v1.3.3 页面异常捕获：异常记录、用户可见提示、设置页展示与清空 | 8 PASS |
 
-共 113 项断言。单个套件运行：
+共 129 项断言。单个套件运行：
 
 ```powershell
 node baseline4.js

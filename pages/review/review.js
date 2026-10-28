@@ -1,6 +1,7 @@
 var e = require("../../@babel/runtime/helpers/toConsumableArray"), t = require("../../@babel/runtime/helpers/objectSpread2"), a = require("../../@babel/runtime/helpers/defineProperty"), n = getApp(), i = require("../../utils/aiDB");
+var safePage = require("../../utils/safePage");
 
-Page({
+Page(safePage.wrapPage({
     data: {
         reviews: [],
         showModal: !1,
@@ -156,4 +157,4 @@ Page({
             }
         });
     }
-});
+}));

@@ -81,6 +81,30 @@
       <view class="text">最近没有保存失败记录</view>
     </view>
   </view>
+  <!-- 页面错误日志 -->
+  <view class="card">
+    <view class="card-title">
+      <view class="icon">🐞</view>
+      <text class="title-text">错误日志（诊断用）</text>
+      <view class="btn-text" catchtap="onRefreshErrorLog">刷新</view>
+    </view>
+    <block wx:if="{{errorLog.length}}">
+      <view class="form-hint">共 {{errorLog.length}} 条，最多保留最近 20 条；点“复制错误日志”发给我即可定位。</view>
+      <view wx:for="{{errorLog}}" wx:key="index" class="diag-item">
+        <view class="diag-time">{{item.time}} · {{item.scope}}</view>
+        <view class="diag-detail">{{item.message}}</view>
+        <view wx:if="{{item.stack}}" class="diag-stack">{{item.stack}}</view>
+      </view>
+      <view class="tool-row">
+        <view class="btn btn-sm btn-secondary" catchtap="onCopyErrorLog">复制错误日志</view>
+        <view class="btn btn-sm btn-secondary" catchtap="onClearErrorLog">清空</view>
+      </view>
+    </block>
+    <view wx:else class="empty-state">
+      <view class="text">暂无页面错误记录</view>
+    </view>
+  </view>
+
   <!-- 关于 -->
   <view class="card">
     <view class="card-title">

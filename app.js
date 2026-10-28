@@ -8,6 +8,7 @@
  * 并自动重试一次，尽量规避偶发的存储写入异常。
  */
 var store = require('./utils/store');
+var safePage = require('./utils/safePage');
 
 /** 尽力上报到微信实时日志（未开启统计上报服务时会静默失败，不影响主流程）。 */
 function reportByRealtimeLog(scope, message) {
@@ -95,6 +96,16 @@ App({
     this._lastSaveError = '';
     this._lastSaveDetail = '';
     this.globalData = this.readData();
+  },
+
+  /** 全局脚本错误：写入本地错误日志，设置页可查看/复制。 */
+  onError: function (err) {
+    safePage.recordError('app:onError', err);
+  },
+
+  /** 未处理的 Promise 异常同样记录。 */
+  onUnhandledRejection: function (res) {
+    safePage.recordError('app:onUnhandledRejection', (res && res.reason) || res || '未知 Promise 异常');
   },
 
   /** 从本地 storage 读取数据（失败/为空时返回空数据结构，并做一次规范化迁移）。 */

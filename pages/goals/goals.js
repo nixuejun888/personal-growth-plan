@@ -1,4 +1,5 @@
 var t = require("../../@babel/runtime/helpers/toConsumableArray");
+var safePage = require("../../utils/safePage");
 
 require("../../@babel/runtime/helpers/Arrayincludes");
 
@@ -63,7 +64,7 @@ function buildStepTemplate(e) {
     });
 }
 
-Page({
+Page(safePage.wrapPage({
     data: {
         goals: [],
         filteredGoals: [],
@@ -147,6 +148,11 @@ Page({
     },
     onShow: function() {
         this.loadGoals();
+        /* 从总览页点「添加目标」跳转过来时，自动打开新建弹窗 */
+        if (s._pendingGoalAdd) {
+            s._pendingGoalAdd = false;
+            this.openAddModal();
+        }
     },
     loadGoals: function() {
         var t = this, a = (s.getData().goals || []).map(function(s) {
@@ -570,4 +576,4 @@ Page({
             icon: "success"
         });
     }
-});
+}));

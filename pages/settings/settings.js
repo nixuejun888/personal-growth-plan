@@ -1,4 +1,5 @@
 var store = require('../../utils/store');
+var safePage = require("../../utils/safePage");
 var app = getApp();
 
 var LAST_ERROR_KEY = 'growthPlannerLastSaveError';
@@ -15,9 +16,9 @@ function formatTime(timestamp) {
   }
 }
 
-Page({
+Page(safePage.wrapPage({
   data: {
-    version: '1.3.2',
+    version: '1.3.3',
     schemaVersion: store.SCHEMA_VERSION,
     storageKey: store.STORAGE_KEY,
     stats: { goals: 0, skills: 0, reviews: 0, path: 0, actions: 0 },
@@ -25,7 +26,8 @@ Page({
     importText: '',
     importPreview: null,
     backups: [],
-    lastSaveError: null
+    lastSaveError: null,
+    errorLog: []
   },
 
   onShow: function () {
@@ -45,6 +47,7 @@ Page({
       stats: counts,
       sizeText: sizeText,
       lastSaveError: this.readLastSaveError(),
+      errorLog: safePage.getErrorLog(),
       backups: store.listBackups().map(function (item) {
         return {
           id: item.id,
@@ -99,6 +102,54 @@ Page({
     }
     this.setData({ lastSaveError: null });
     wx.showToast({ title: '已清除', icon: 'none' });
+  },
+
+  /* ---------------- 错误日志（页面异常，诊断用） ---------------- */
+
+  onRefreshErrorLog: function () {
+    this.setData({ errorLog: safePage.getErrorLog() });
+    wx.showToast({ title: '已刷新', icon: 'none' });
+  },
+
+  onCopyErrorLog: function () {
+    var list = safePage.getErrorLog();
+    if (!list.length) {
+      wx.showToast({ title: '暂无错误记录', icon: 'none' });
+      return;
+    }
+    var lines = ['小程序版本：' + this.data.version, '错误记录（' + list.length + ' 条）：'];
+    list.forEach(function (item, index) {
+      lines.push('');
+      lines.push((index + 1) + '. [' + item.time + '] ' + item.scope);
+      lines.push('   原因：' + item.message);
+      if (item.stack) lines.push('   堆栈：' + item.stack);
+    });
+    var text = lines.join('\n');
+    wx.setClipboardData({
+      data: text,
+      success: function () {
+        wx.showToast({ title: '已复制，请发给开发者', icon: 'none' });
+      },
+      fail: function () {
+        wx.showToast({ title: '复制失败，请截图本页', icon: 'none' });
+      }
+    });
+  },
+
+  onClearErrorLog: function () {
+    var self = this;
+    wx.showModal({
+      title: '清空错误日志？',
+      content: '清空后无法恢复，不影响你的数据。',
+      confirmText: '清空',
+      cancelText: '取消',
+      success: function (res) {
+        if (!res.confirm) return;
+        safePage.clearErrorLog();
+        self.setData({ errorLog: [] });
+        wx.showToast({ title: '已清空', icon: 'none' });
+      }
+    });
   },
 
   /* ---------------- 导出 ---------------- */
@@ -250,4 +301,4 @@ Page({
       }
     });
   }
-});
+}));

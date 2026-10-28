@@ -1,6 +1,7 @@
 var t = require("../../@babel/runtime/helpers/defineProperty"), a = require("../../@babel/runtime/helpers/objectSpread2"), i = require("../../@babel/runtime/helpers/toConsumableArray"), e = getApp(), o = require("../../utils/aiDB");
+var safePage = require("../../utils/safePage");
 
-Page({
+Page(safePage.wrapPage({
     data: {
         path: [],
         actions: [],
@@ -408,4 +409,4 @@ Page({
         });
     },
     stopPropagation: function() {}
-});
+}));

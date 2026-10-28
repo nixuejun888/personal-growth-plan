@@ -1,4 +1,5 @@
 var t = require("../../@babel/runtime/helpers/toConsumableArray"), e = require("../../@babel/runtime/helpers/objectSpread2"), a = getApp(), i = require("../../utils/aiDB");
+var safePage = require("../../utils/safePage");
 
 /* 只保留技能的业务字段，避免把 levelText 等展示字段写回全局数据 */
 function plainSkill(e) {
@@ -15,7 +16,7 @@ function plainSkills(e) {
     return (e || []).map(plainSkill);
 }
 
-Page({
+Page(safePage.wrapPage({
     data: {
         skills: [],
         filteredSkills: [],
@@ -280,4 +281,4 @@ Page({
             icon: "success"
         });
     }
-});
+}));

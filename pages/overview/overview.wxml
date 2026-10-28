@@ -29,7 +29,7 @@
         <view class="card-header">
             <view class="card-title">
                 <view class="icon">🎯</view>近期目标</view>
-            <view bindtap="goToGoals" class="btn btn-primary btn-sm">添加目标</view>
+            <view bindtap="addGoal" class="btn btn-primary btn-sm">添加目标</view>
         </view>
         <block wx:if="{{recentGoals.length>0}}">
             <view class="goal-item {{goal.term}}" wx:for="{{recentGoals}}" wx:key="id">
@@ -46,7 +46,7 @@
         <view class="empty-state" wx:else>
             <view class="icon">🎯</view>
             <view class="text">还没有设定目标</view>
-            <view bindtap="goToGoals" class="btn btn-primary">添加目标</view>
+            <view bindtap="addGoal" class="btn btn-primary">添加目标</view>
         </view>
     </view>
     <view class="card">

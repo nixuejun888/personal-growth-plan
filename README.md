@@ -43,7 +43,7 @@ tests/e2e/                     # miniprogram-automator 端到端测试（不参�
 
 ## 测试
 
-`tests/e2e/` 下是基于 [miniprogram-automator](https://developers.weixin.qq.com/miniprogram/dev/devtools/auto/) 的端到端测试（需要先 `npm i miniprogram-automator`，并按 `tests/e2e/README.md` 开启自动化端口）。当前覆盖 39 + 15 + 23 + 12 + 24 = 113 项断言，全部通过。
+`tests/e2e/` 下是基于 [miniprogram-automator](https://developers.weixin.qq.com/miniprogram/dev/devtools/auto/) 的端到端测试（需要先 `npm i miniprogram-automator`，并按 `tests/e2e/README.md` 开启自动化端口）。当前覆盖 113 项回归断言 + 8 项真实点击保存 + 8 项异常捕获 = 129 项，全部通过。
 
 ## 版本
 
@@ -52,5 +52,6 @@ tests/e2e/                     # miniprogram-automator 端到端测试（不参�
 - v1.2.0：数据导出/导入/本地备份、删除撤销、表单未保存提醒、页面 JS 可读化、自动化测试。
 - v1.3.0：目标拆解步骤、分年愿景、成长洞察引擎。
 - v1.3.1：保存失败诊断增强（保存失败时展示具体原因、自动重试一次、上报实时日志；兼容历史脏数据）。
-- v1.3.2：设备端保存异常兜底（失败自动回退 JSON 保存 + 设置页保存诊断卡）+ 页面 AI 文案整改（统一为参考引导/洞察分析等），当前版本。
+- v1.3.2：设备端保存异常兜底（失败自动回退 JSON 保存 + 设置页保存诊断卡）+ 页面 AI 文案整改（统一为参考引导/洞察分析等）。
+- v1.3.3：真机保存问题诊断——所有页面方法异常自动捕获并提示（不再静默失败），错误日志可在「设置 → 错误日志」查看/复制；总览「添加目标」直达弹窗；上传构建关闭 JS 压缩混淆；当前版本。
 
