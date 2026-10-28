@@ -74,7 +74,7 @@ Page({
       wx.showToast({ title: '已经给过类似建议啦', icon: 'none' });
       return;
     }
-    var next = [{ type: 'ai', title: '✦ AI 建议', content: picked, action: '' }].concat(this.data.insights);
+    var next = [{ type: 'ai', title: '✦ 参考建议', content: picked, action: '' }].concat(this.data.insights);
     this.setData({ insights: next.slice(0, MAX_INSIGHTS) });
   },
 

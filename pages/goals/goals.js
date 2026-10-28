@@ -46,7 +46,7 @@ function computeProgress(e) {
     };
 }
 
-/* AI 拆解步骤：优先匹配内置模板，匹配不到时给通用模板 */
+/* 一键拆解步骤：优先匹配内置模板，匹配不到时给通用模板 */
 function buildStepTemplate(e) {
     for (var t = a.subtaskTemplates, i = e || "", n = null, s = Object.keys(t), o = 0; o < s.length; o++) {
         var r = s[o];
@@ -370,7 +370,7 @@ Page({
         };
         this.data.stepsForm.subtasks.length > 0 ? wx.showModal({
             title: "重新生成步骤？",
-            content: "AI 拆解会替换当前步骤列表，已有内容会被覆盖。",
+            content: "一键拆解会替换当前步骤列表，已有内容会被覆盖。",
             confirmText: "重新生成",
             cancelText: "取消",
             success: function(t) {

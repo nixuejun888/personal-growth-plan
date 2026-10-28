@@ -1,6 +1,6 @@
 <view class="container">
     <view class="ai-hint">
-        <view class="ai-hint-badge">AI 引导</view>
+        <view class="ai-hint-badge">参考引导</view>
         <view class="ai-hint-title">复盘框架推荐</view>
         <view class="ai-hint-body">推荐使用 KPT 复盘法：<view style="margin-top:12rpx;">
                 <view style="margin-bottom:8rpx;">
@@ -63,7 +63,7 @@
             </picker>
         </view>
         <view class="form-group">
-            <view class="form-label">本周成就<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="achievement" style="margin-left:12rpx;">AI 提问</view>
+            <view class="form-label">本周成就<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="achievement" style="margin-left:12rpx;">参考提问</view>
             </view>
             <textarea bindinput="onAchievementInput" class="form-textarea" placeholder="完成了哪些重要的事情？" value="{{formData.achievement}}"></textarea>
             <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.achievement}}">
@@ -71,7 +71,7 @@
             </view>
         </view>
         <view class="form-group">
-            <view class="form-label">遇到的挑战<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="challenge" style="margin-left:12rpx;">AI 提问</view>
+            <view class="form-label">遇到的挑战<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="challenge" style="margin-left:12rpx;">参考提问</view>
             </view>
             <textarea bindinput="onChallengeInput" class="form-textarea" placeholder="遇到了什么困难？如何克服的？" value="{{formData.challenge}}"></textarea>
             <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.challenge}}">
@@ -79,7 +79,7 @@
             </view>
         </view>
         <view class="form-group">
-            <view class="form-label">学到了什么<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="learning" style="margin-left:12rpx;">AI 提问</view>
+            <view class="form-label">学到了什么<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="learning" style="margin-left:12rpx;">参考提问</view>
             </view>
             <textarea bindinput="onLearningInput" class="form-textarea" placeholder="有哪些新的认知和收获？" value="{{formData.learning}}"></textarea>
             <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.learning}}">
@@ -87,7 +87,7 @@
             </view>
         </view>
         <view class="form-group">
-            <view class="form-label">下周计划<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="plan" style="margin-left:12rpx;">AI 提问</view>
+            <view class="form-label">下周计划<view bindtap="showHint" class="btn btn-ai btn-sm" data-field="plan" style="margin-left:12rpx;">参考提问</view>
             </view>
             <textarea bindinput="onPlanInput" class="form-textarea" placeholder="接下来要做什么？" value="{{formData.plan}}"></textarea>
             <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{hints.plan}}">

@@ -6,7 +6,7 @@
             <view bindtap="openPathModal" class="btn btn-secondary btn-sm">编辑路径</view>
         </view>
         <view class="ai-hint" style="margin-bottom:16rpx;">
-            <view class="ai-hint-badge">AI 引导</view>
+            <view class="ai-hint-badge">参考引导</view>
             <view class="ai-hint-title">常见发展路径参考</view>
             <view class="ai-hint-body">点击下方路径模板快速填充：<view class="chip-group">
                     <view bindtap="loadPathTemplate" class="chip" data-type="tech">技术路线</view>
@@ -137,7 +137,7 @@
             <view bindtap="closeVisionModal" class="modal-close">✕</view>
         </view>
         <view class="form-group" wx:for="{{visionForm.years}}" wx:key="index">
-            <view class="form-label">愿景年份<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-index="{{index}}" style="margin-left:12rpx;">AI 启发</view>
+            <view class="form-label">愿景年份<view bindtap="showVisionHint" class="btn btn-ai btn-sm" data-index="{{index}}" style="margin-left:12rpx;">参考启发</view>
             </view>
             <view style="display:flex;align-items:center;gap:12rpx;margin-bottom:12rpx;">
                 <input bindinput="onVisionYearInput" class="form-input" data-index="{{index}}" placeholder="年份，如 2027" style="flex:1;" type="number" value="{{item.year}}"></input>
@@ -150,7 +150,7 @@
         </view>
         <view bindtap="addVisionYear" class="btn btn-secondary" style="margin-top:8rpx;">+ 添加一个年份</view>
         <view class="form-group">
-            <view class="form-label">核心价值观<view bindtap="showValuesHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 启发</view>
+            <view class="form-label">核心价值观<view bindtap="showValuesHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">参考启发</view>
             </view>
             <textarea bindinput="onVisionValuesInput" class="form-textarea" placeholder="什么对你来说最重要？" value="{{visionForm.values}}"></textarea>
             <view class="ai-hint" style="margin-top:12rpx;" wx:if="{{visionValuesHint}}">

@@ -21,9 +21,9 @@
         </view>
     </view>
     <view bindtap="openAiPanel" class="ai-hint">
-        <view class="ai-hint-badge">AI 成长顾问</view>
+        <view class="ai-hint-badge">成长助手</view>
         <view class="ai-hint-title">不确定从哪开始？</view>
-        <view class="ai-hint-body">让 AI 引导你完成技能盘点、目标拆解和方向规划</view>
+        <view class="ai-hint-body">成长助手会陪你完成技能盘点、目标拆解和方向规划</view>
     </view>
     <view class="card">
         <view class="card-header">
@@ -76,7 +76,7 @@
         <view class="card-header">
             <view class="card-title">
                 <view class="icon">💡</view>成长洞察</view>
-            <view bindtap="generateInsight" class="btn btn-ai btn-sm">AI 分析</view>
+            <view bindtap="generateInsight" class="btn btn-ai btn-sm">洞察分析</view>
         </view>
         <view class="insight-card {{item.type}}" wx:for="{{insights}}" wx:key="index" bindtap="onInsightTap" data-action="{{item.action}}">
             <view class="insight-title">{{item.title}}</view>
@@ -89,7 +89,7 @@
 <view class="ai-panel {{aiPanelOpen?'open':''}}">
     <view class="ai-panel-header">
         <view class="ai-panel-title">
-            <text>✦</text>AI 成长顾问</view>
+            <text>✦</text>成长助手</view>
         <view bindtap="closeAiPanel" class="modal-close">✕</view>
     </view>
     <view class="ai-panel-body">

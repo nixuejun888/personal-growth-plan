@@ -1,6 +1,6 @@
 <view class="container">
     <view class="ai-hint">
-        <view class="ai-hint-badge">AI 引导</view>
+        <view class="ai-hint-badge">参考引导</view>
         <view class="ai-hint-title">如何设定好目标？</view>
         <view class="ai-hint-body">好的目标遵循 SMART 原则：具体、可衡量、可实现、相关性、有时限。<view class="chip-group">
                 <view bindtap="quickAddGoal" class="chip" data-term="{{item.term}}" data-title="{{item.title}}" wx:for="{{goalChips}}" wx:key="title">{{item.text}}</view>
@@ -63,12 +63,12 @@
             <view bindtap="closeModal" class="modal-close">✕</view>
         </view>
         <view class="form-group">
-            <view class="form-label">目标名称<view bindtap="showTitleHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 润色</view>
+            <view class="form-label">目标名称<view bindtap="showTitleHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">措辞参考</view>
             </view>
             <input bindinput="onTitleInput" class="form-input" placeholder="例如：掌握React框架" value="{{formData.title}}"></input>
         </view>
         <view class="ai-hint" wx:if="{{showTitleSuggestions}}">
-            <view class="ai-hint-badge">AI 润色建议</view>
+            <view class="ai-hint-badge">措辞参考</view>
             <view class="ai-hint-body">
                 <view class="chip-group">
                     <view bindtap="fillTitle" class="chip" data-text="{{item}}" wx:for="{{titleSuggestions}}" wx:key="index">{{item}}</view>
@@ -82,12 +82,12 @@
             </picker>
         </view>
         <view class="form-group">
-            <view class="form-label">目标描述<view bindtap="showDescHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 引导</view>
+            <view class="form-label">目标描述<view bindtap="showDescHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">参考引导</view>
             </view>
             <textarea bindinput="onDescInput" class="form-textarea" placeholder="描述你的目标和期望成果" value="{{formData.desc}}"></textarea>
         </view>
         <view class="ai-hint" wx:if="{{showDescFramework}}">
-            <view class="ai-hint-badge">AI 引导</view>
+            <view class="ai-hint-badge">参考引导</view>
             <view class="ai-hint-body">
                 <view>{{descFramework}}</view>
                 <view bindtap="fillDescTemplate" class="btn btn-secondary btn-sm" style="margin-top:16rpx;">填入模板</view>
@@ -101,7 +101,7 @@
             </view>
         </view>
         <view class="form-group">
-            <view class="form-label">拆解为步骤<view bindtap="generateSubtasks" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 拆解</view>
+            <view class="form-label">拆解为步骤<view bindtap="generateSubtasks" class="btn btn-ai btn-sm" style="margin-left:12rpx;">一键拆解</view>
             </view>
             <view wx:if="{{formData.subtasks.length>0}}">
                 <view class="subtask-item" wx:for="{{formData.subtasks}}" wx:key="index">
@@ -135,7 +135,7 @@
             <view style="color:#64748b;font-size:24rpx;margin-top:8rpx;">把大目标拆成 3-6 个可以勾选的小步骤，进度会自动计算。</view>
         </view>
         <view class="form-group">
-            <view class="form-label">步骤列表<view bindtap="generateSteps" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 拆解</view>
+            <view class="form-label">步骤列表<view bindtap="generateSteps" class="btn btn-ai btn-sm" style="margin-left:12rpx;">一键拆解</view>
             </view>
             <block wx:if="{{stepsForm.subtasks.length>0}}">
                 <view class="step-row" wx:for="{{stepsForm.subtasks}}" wx:key="index">
@@ -148,7 +148,7 @@
                 </view>
             </block>
             <view class="empty-state" style="padding:24rpx 0;" wx:else>
-                <view class="text">还没有步骤，点「AI 拆解」或手动添加</view>
+                <view class="text">还没有步骤，点「一键拆解」或手动添加</view>
             </view>
             <view bindtap="addStep" class="btn btn-secondary btn-sm" style="margin-top:12rpx;">+ 添加步骤</view>
         </view>

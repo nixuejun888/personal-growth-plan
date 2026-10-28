@@ -61,6 +61,26 @@
     </view>
   </view>
 
+  <!-- 保存诊断 -->
+  <view class="card">
+    <view class="card-title">
+      <view class="icon">🩺</view>
+      <text class="title-text">保存诊断</text>
+      <view wx:if="{{lastSaveError}}" class="btn-text" catchtap="onClearLastError">清除</view>
+    </view>
+    <block wx:if="{{lastSaveError}}">
+      <view class="form-hint">最近一次保存失败：{{lastSaveError.timeText}}</view>
+      <view class="diag-detail">{{lastSaveError.detail}}</view>
+      <view wx:if="{{lastSaveError.stack}}" class="diag-stack">{{lastSaveError.stack}}</view>
+      <view class="tool-row">
+        <view class="btn btn-sm btn-secondary" catchtap="onCopyLastError">复制错误信息</view>
+      </view>
+      <view class="form-hint">把复制的内容发给我即可精准定位；若提示存储空间不足，可在微信「设置 → 通用 → 存储空间」清理后重试。</view>
+    </block>
+    <view wx:else class="empty-state">
+      <view class="text">最近没有保存失败记录</view>
+    </view>
+  </view>
   <!-- 关于 -->
   <view class="card">
     <view class="card-title">

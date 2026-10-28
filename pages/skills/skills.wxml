@@ -1,6 +1,6 @@
 <view class="container">
     <view class="ai-hint">
-        <view class="ai-hint-badge">AI 引导</view>
+        <view class="ai-hint-badge">参考引导</view>
         <view class="ai-hint-title">如何盘点技能？</view>
         <view class="ai-hint-body">从以下维度思考你掌握的技能，点击标签快速添加：<view class="chip-group">
                 <view bindtap="quickAddSkill" class="chip" data-category="{{item.category}}" data-name="{{item.name}}" wx:for="{{skillChips}}" wx:key="name">{{item.name}}</view>
@@ -72,12 +72,12 @@
             </view>
         </view>
         <view class="form-group">
-            <view class="form-label">备注（可选）<view bindtap="showNoteHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">AI 建议</view>
+            <view class="form-label">备注（可选）<view bindtap="showNoteHint" class="btn btn-ai btn-sm" style="margin-left:12rpx;">参考建议</view>
             </view>
             <textarea bindinput="onNoteInput" class="form-textarea" placeholder="学习经历、证书等" value="{{formData.note}}"></textarea>
         </view>
         <view class="ai-hint" wx:if="{{showNoteSuggestions}}">
-            <view class="ai-hint-badge">AI 建议</view>
+            <view class="ai-hint-badge">参考建议</view>
             <view class="ai-hint-body">
                 <view class="chip-group">
                     <view bindtap="fillNote" class="chip" data-text="{{item}}" wx:for="{{noteSuggestions}}" wx:key="index">{{item}}</view>

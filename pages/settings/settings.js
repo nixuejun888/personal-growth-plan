@@ -1,16 +1,31 @@
 var store = require('../../utils/store');
 var app = getApp();
 
+var LAST_ERROR_KEY = 'growthPlannerLastSaveError';
+
+/** 时间戳 → 2026-10-28 12:30 文本。 */
+function formatTime(timestamp) {
+  try {
+    var d = new Date(timestamp);
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+      ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  } catch (e) {
+    return '';
+  }
+}
+
 Page({
   data: {
-    version: '1.3.1',
+    version: '1.3.2',
     schemaVersion: store.SCHEMA_VERSION,
     storageKey: store.STORAGE_KEY,
     stats: { goals: 0, skills: 0, reviews: 0, path: 0, actions: 0 },
     sizeText: '-',
     importText: '',
     importPreview: null,
-    backups: []
+    backups: [],
+    lastSaveError: null
   },
 
   onShow: function () {
@@ -29,6 +44,7 @@ Page({
     this.setData({
       stats: counts,
       sizeText: sizeText,
+      lastSaveError: this.readLastSaveError(),
       backups: store.listBackups().map(function (item) {
         return {
           id: item.id,
@@ -38,6 +54,51 @@ Page({
         };
       })
     });
+  },
+
+  /** 读取最近一次保存失败记录（本地缓存 + 当前运行期内存）。 */
+  readLastSaveError: function () {
+    try {
+      var cached = wx.getStorageSync(LAST_ERROR_KEY);
+      if (cached && cached.time) {
+        return {
+          timeText: formatTime(cached.time),
+          detail: cached.detail || cached.message || '',
+          stack: cached.stack || ''
+        };
+      }
+    } catch (e) {
+      console.error('[growth-planner] 读取保存失败记录异常', e);
+    }
+    var live = app.getLastSaveDetail ? app.getLastSaveDetail() : '';
+    if (live) return { timeText: '刚刚（本次运行）', detail: live, stack: '' };
+    return null;
+  },
+
+  onCopyLastError: function () {
+    var current = this.data.lastSaveError;
+    if (!current) return;
+    var text = '时间：' + current.timeText + '\n原因：' + current.detail +
+      (current.stack ? '\n堆栈：' + current.stack : '');
+    wx.setClipboardData({
+      data: text,
+      success: function () {
+        wx.showToast({ title: '已复制，请发给开发者', icon: 'none' });
+      },
+      fail: function () {
+        wx.showToast({ title: '复制失败，请截图本页', icon: 'none' });
+      }
+    });
+  },
+
+  onClearLastError: function () {
+    try {
+      wx.removeStorageSync(LAST_ERROR_KEY);
+    } catch (e) {
+      console.error('[growth-planner] 清除保存失败记录异常', e);
+    }
+    this.setData({ lastSaveError: null });
+    wx.showToast({ title: '已清除', icon: 'none' });
   },
 
   /* ---------------- 导出 ---------------- */

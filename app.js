@@ -34,9 +34,66 @@ function describeError(err) {
   }
 }
 
+/** 从错误堆栈里取第一条含 .js 的栈帧，便于定位（如 pages/skills/skills.js:12:34）。 */
+function pickStackFrame(err) {
+  try {
+    var stack = err && err.stack ? String(err.stack) : '';
+    if (!stack) return '';
+    var lines = stack.split('\n');
+    var i;
+    for (i = 0; i < lines.length; i += 1) {
+      var line = lines[i];
+      if (line.indexOf('.js:') !== -1) {
+        var match = line.match(/([A-Za-z0-9_\-./]+\.js:\d+:\d+)/);
+        if (match) return match[1];
+        return line.replace(/^\s+|\s+$/g, '').slice(0, 120);
+      }
+    }
+  } catch (e) {
+    /* 忽略 */
+  }
+  return '';
+}
+
+/** 完整错误详情（message + 栈帧 + 堆栈前几行），写入本地供设置页排查。 */
+function describeErrorDetail(err) {
+  var message = describeError(err);
+  var frame = pickStackFrame(err);
+  var stack = '';
+  try {
+    if (err && err.stack) stack = String(err.stack).split('\n').slice(0, 4).join('\n');
+  } catch (e) {
+    stack = '';
+  }
+  return {
+    message: message,
+    frame: frame,
+    detail: message + (frame ? ' @' + frame : ''),
+    stack: stack
+  };
+}
+
+var LAST_ERROR_KEY = 'growthPlannerLastSaveError';
+
+/** 记录最近一次保存失败（尽力而为；存储本身不可用时静默失败）。 */
+function rememberSaveError(errorInfo) {
+  try {
+    wx.setStorageSync(LAST_ERROR_KEY, {
+      time: Date.now(),
+      message: errorInfo.message,
+      frame: errorInfo.frame,
+      detail: errorInfo.detail,
+      stack: errorInfo.stack
+    });
+  } catch (e) {
+    /* 忽略 */
+  }
+}
+
 App({
   onLaunch: function () {
     this._lastSaveError = '';
+    this._lastSaveDetail = '';
     this.globalData = this.readData();
   },
 
@@ -57,22 +114,33 @@ App({
    * 失败时会记录原因、写实时日志，并自动重试一次。
    */
   saveData: function () {
-    var payload;
+    var payload = null;
+    var firstError = null;
     try {
       payload = store.toPlainData(this.globalData);
     } catch (e) {
-      this._lastSaveError = describeError(e);
+      firstError = e;
+      var info = describeErrorDetail(e);
+      this._lastSaveError = info.message;
+      this._lastSaveDetail = info.detail;
       console.error('[growth-planner] 序列化数据失败', e);
-      reportByRealtimeLog('serialize', this._lastSaveError);
-      return false;
+      reportByRealtimeLog('serialize', info.detail + (info.stack ? '\n' + info.stack : ''));
+      rememberSaveError(info);
+      // 兜底：直接用 JSON 深拷贝尝试保存，避免个别对象异常导致完全无法保存
+      try {
+        payload = JSON.parse(JSON.stringify(this.globalData || {}));
+      } catch (e2) {
+        payload = null;
+      }
+      if (!payload) return false;
     }
 
-    var firstError = null;
     var attempt;
     for (attempt = 0; attempt < 2; attempt += 1) {
       try {
         wx.setStorageSync(store.STORAGE_KEY, payload);
         this._lastSaveError = '';
+        this._lastSaveDetail = '';
         return true;
       } catch (e) {
         if (!firstError) firstError = e;
@@ -80,8 +148,11 @@ App({
       }
     }
 
-    this._lastSaveError = describeError(firstError);
-    reportByRealtimeLog('saveData', this._lastSaveError);
+    var failed = describeErrorDetail(firstError);
+    this._lastSaveError = failed.message;
+    this._lastSaveDetail = failed.detail;
+    reportByRealtimeLog('saveData', failed.detail + (failed.stack ? '\n' + failed.stack : ''));
+    rememberSaveError(failed);
     return false;
   },
 
@@ -104,6 +175,11 @@ App({
   /** 最近一次保存失败的具体原因（成功时为空字符串），用于页面提示排查。 */
   getLastSaveError: function () {
     return this._lastSaveError || '';
+  },
+
+  /** 最近一次保存失败的详细信息（含栈帧/堆栈，成功时为空）。 */
+  getLastSaveDetail: function () {
+    return this._lastSaveDetail || '';
   },
 
   /** 页面可用的简短失败提示：无原因时退化为通用文案。 */
